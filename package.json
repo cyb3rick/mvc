@@ -1,6 +1,6 @@
 {
   "name": "mvc",
-  "description": "This is a workflow tutorial on mvc using expressjs."
+  "description": "This is a workflow tutorial on mvc using expressjs.",
   "version": "0.1.0",
   "homepage": "https://github.com/cyb3rick/mvc",
   "author": {
@@ -27,8 +27,7 @@
   "dependencies": {    
     "express": "*",
     "ejs": "*",
-    "mongodb": "*",
-    "jasmine-node": "*"    
+    "mongodb": "*"    
   },
   "devDependencies": {
   	"jasmine-node": "*"    
