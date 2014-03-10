@@ -1,4 +1,4 @@
 mvc
 ===
 
-This workflow tutorial on MVC using expressjs, node, mongodb, and jasmine. :)
+This is a workflow tutorial on MVC using expressjs, node, mongodb, and jasmine. :)
