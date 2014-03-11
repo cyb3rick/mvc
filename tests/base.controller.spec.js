@@ -3,8 +3,8 @@ var BaseController = require('../controllers/Base');
 describe("Base controller", function() {
 	it("should have an extend method that returns a child instance", function(next) {
 		expect(BaseController.extend).toBeDefined();
-		var child = BaseController.extend({name:"my child controller"});		
-		expect(child.name).toBe('my child controller');				
+		var child = BaseController.extend({name:"my child controller"});
+		expect(child.name).toBe('my child controller');		
 		expect(child.run).toBeDefined();
 		next();				
 	});		
