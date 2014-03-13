@@ -17,23 +17,35 @@ app.set('views', __dirname + '/templates');
 //With this we can call res.render('foo', {data:'data'})
 app.set('view engine', 'html');
 
+var mongoURL = config.mongo.url;
 
-var mongoURL = 'mongodb://' + config.mongo.host + ':' + config.mongo.port + '/myDB';
 MongoClient.connect(mongoURL, function(err, db) {
 	if (!err) {
 		//Controllers
-		var Admin = require('./controllers/Admin');
+		var Admin = require('./controllers/Admin2');
+		//var Announcement = require('./controllers/Announcement');
+
+		//Express middleware
+		app.use(express.bodyParser());
+		app.use(express.cookieParser('superSecretString123'));
+		app.use(express.session());			
 		
-		//Middleware		
-		var attachDB = function(req,res,next) {
+		//Custom middleware		
+		var attachDB = function(req, res, next) {
 			req.db = db;
 			next();
 		};
 		
 		//Routes
-		app.get('/admin', function(req,res,next){ 
-			Admin.run(req,res,next); 
+		app.all('/admin', attachDB, function(req, res, next){ 
+			Admin.run(req, res, next); 
 		});
+		app.all('/admin/announcements', attachDB, function(req, res, next){
+			Admin.announcements(req, res, next);
+		});	
+		app.all('/admin/keys', attachDB, function(req, res, next){
+			Admin.keys(req, res, next);
+		});				
 		
 		//Start listening for HTTP requests
 		http.createServer(app).listen(config.port, function() {

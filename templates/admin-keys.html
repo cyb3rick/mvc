@@ -1,0 +1,11 @@
+<% include header.html %>		
+		
+		<h1> <%= content %> </h1>
+			
+		<ul>
+    		<% keys.forEach(function(key){ %>
+	      		<li>API Key (<%= key._id %>) [ <a href="#">disable</a> | <a href="#">delete</a> ]</li>
+    		<% }) %>
+  		</ul>
+  		
+<% include footer.html %>

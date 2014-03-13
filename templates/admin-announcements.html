@@ -1,0 +1,11 @@
+<% include header.html %>
+
+		<h1> <%= content %> </h1>
+		
+		<ul>
+    		<% announcements.forEach(function(announ){ %>
+	      		<li> <%= announ.title %> </li>
+    		<% }) %>
+  		</ul>
+
+<% include footer.html %>
