@@ -22,8 +22,7 @@ var mongoURL = config.mongo.url;
 MongoClient.connect(mongoURL, function(err, db) {
 	if (!err) {
 		//Controllers
-		var Admin = require('./controllers/Admin2');
-		//var Announcement = require('./controllers/Announcement');
+		var Admin = require('./controllers/Admin');		
 
 		//Express middleware
 		app.use(express.bodyParser());

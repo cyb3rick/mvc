@@ -1,48 +1,51 @@
 var BaseController = require('./Base');
 var View = require('../views/Base');
-var AdminModel = require('../models/Admin');
+var model = new (require('../models/Admin')); // require('path/to/model') returns a constructor
 
 module.exports = BaseController.extend({
 	name: 'Admin',
 	username: 'root',
 	password: 'root',
-	run: function(req, res, next) {		
-				
-		if (this.authorize(req)) { // authorized
-			req.session.mvc = true;
-			req.session.save();
-			
-			//Once I've verified the admin is logged in
-			//I can inspect the route and dpending on that, 
-			//create a view and pass it to some helper function.
-			
-			// i.e. route: /admin/test/one
-			//		routeParts: ['admin','test','one']
-			var routeParts = req.path.split('/').splice(1);
-			
+	run: function(req, res, next) {			
+		this.authorize(req, res, function (){			
 			var v = new View(res, 'admin');
-			var self = this;
-			self.listAnnouncements(req, function(announcementsArray) {
-				self.listKeys(req, function(keysArray) {
-					v.render({
-						title: 			'Administration',
-						content: 		'Welcome to the Control Panel',
-						announcements: 	announcementsArray,
-						keys: 			keysArray
-					});				
-				});
-			});
-		} else { // unauthorized user
-			var v = new View(res, 'admin-login');
 			v.render({
-				title: 'Login',
-				content: 'Please Log In'				
+				title: 'Administration',
+				content: 'Welcome to the Administration Panel'
 			});
-		}
+		});
+	},
+	announcements: function(req, res, next) {		
+		this.authorize(req, res, function() {			
+			model.getAnnouncements(function(err, documents) {
+				if (!err) {			
+					var v = new View(res, 'admin-announcements');
+					v.render({
+						title: 'Announcements',
+						content: 'List of Announcements:',
+						announcements: documents
+					});
+				}
+			});			
+		});
 	},	
-	authorize: function(req) {		
-		var adminModel = new AdminModel(req.db);						
-		return (
+	keys: function(req, res, next) {
+		this.authorize(req, res, function() {			
+			model.getKeys(function(err, documents) {
+				if (!err) {			
+					var v = new View(res, 'admin-keys');
+					v.render({
+						title: 'API Keys',
+						content: 'List of API Keys:',
+						keys: documents
+					});
+				}
+			});			
+		});
+	},
+	authorize: function(req, res, next) {	
+		console.log("From Path: " + req.path);	
+		var isAuthorized = (
 			req.session &&
 			req.session.mvc &&
 			req.session.mvc === true
@@ -51,26 +54,19 @@ module.exports = BaseController.extend({
 			req.body.username === this.username,
 			req.body.password === this.password
 		);
-	},
-	listAnnouncements: function(req, callback) {
-		//TODO: change to: var announcementModel = new AnnouncementModel(req.db);
-		var adminModel = new AdminModel(req.db);
-				
-		adminModel.getAnnouncements(function(err, documents) {
-			if (!err) {			
-				callback(documents);		
-			}
-		});		
-	},
-	listKeys: function(req, callback) {
 		
-		var adminModel = new AdminModel(req.db);
-				
-		adminModel.getKeys(function(err, documents) {
-			if (!err) {	
-				callback(documents);		
-			}
-		});		
-	},
-		
+		if (isAuthorized) {			
+			req.session.mvc = true;
+			req.session.save();
+			model.setDB(req.db);
+			next();
+		} else {
+			var v = new View(res, 'admin-login');
+			v.render({
+				title: 'Login',
+				content: 'Please Log In',
+				from: req.path			
+			});
+		}
+	}
 });
