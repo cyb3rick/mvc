@@ -1,10 +1,16 @@
 var BaseController = require('./Base');
 var View = require('../views/Base');
-var model = new (require('../models/Admin')); // require('path/to/model') returns a constructor
+
+var moment = require('moment');
+
+//Models
+//Remember, require('path/to/model') returns a constructor
+var keyModel = new (require('../models/Key'));
+var announModel = new (require('../models/Announcement'));
 
 module.exports = BaseController.extend({
 	name: 'Admin',
-	username: 'root',
+	username: 'root', //TODO: Get this from db.
 	password: 'root',
 	run: function(req, res, next) {			
 		this.authorize(req, res, function (){			
@@ -15,9 +21,9 @@ module.exports = BaseController.extend({
 			});
 		});
 	},
-	announcements: function(req, res, next) {		
-		this.authorize(req, res, function() {			
-			model.getAnnouncements(function(err, documents) {
+	listAnnouncements: function(req, res, next) {
+		this.authorize(req, res, function() {
+			announModel.findAll(function(err, documents) {
 				if (!err) {			
 					var v = new View(res, 'admin-announcements');
 					v.render({
@@ -26,12 +32,56 @@ module.exports = BaseController.extend({
 						announcements: documents
 					});
 				}
-			});			
+			});
 		});
-	},	
-	keys: function(req, res, next) {
+	},
+	detailedAnnouncement: function(req, res, next) {
+		// When I click one of the announcements
+		// a new view opens which lets me modify
+		// it or delete it.		
 		this.authorize(req, res, function() {			
-			model.getKeys(function(err, documents) {
+			announModel.findById(req.params.id, function(err, announ) {						
+				if (!err) {																	
+					var v = new View(res, 'admin-announcements-detail');					
+					//Format dates for display
+					announ.startDate = moment(announ.startDate).format("YYYY-MM-DD");
+					announ.endDate = moment(announ.endDate).format("YYYY-MM-DD");					
+					v.render({
+						title: 'Update',
+						content: 'Update Announcement:',
+						announ: announ
+					});							
+				}
+				else { console.log(err); }
+			});
+		});		
+	},
+	updateAnnouncement: function(req, res, next) {
+		this.authorize(req, res, function() {
+			var announ = {
+				'id': req.params.id,
+				'title': req.body.title,
+				'body': req.body.body,
+				'startDate': moment(req.body.startDate).toDate(),					
+				'endDate': moment(req.body.endDate).toDate()
+			};												
+			announModel.update(announ, function(err) {
+				if (!err) { console.log('Success: updating announcemet.'); }
+				else { console.log('Error: updating announcement.'); }
+			});
+		});
+	},
+	deleteAnnouncement: function(req, res, next) {
+		this.authorize(req, res, function() {												
+			announModel.removeById(req.params.id, function(err) {
+				if (!err) { console.log('Success: removing announcement.'); }
+				else { console.log('Error: removing announcement.'); }
+			});
+		});
+	},
+	listKeys: function(req, res, next) {
+		this.authorize(req, res, function() {			
+			keyModel.getKeys(function(err, documents) {
 				if (!err) {			
 					var v = new View(res, 'admin-keys');
 					v.render({
@@ -43,8 +93,31 @@ module.exports = BaseController.extend({
 			});			
 		});
 	},
-	authorize: function(req, res, next) {	
-		console.log("From Path: " + req.path);	
+	enableKey: function(req, res, next) {
+		this.authorize(req, res, function() {
+			keyModel.enable(req.params.id, function(err) {
+				if (!err) { console.log('Success: enabling api key'); }
+				else { console.log('Error: enabling api key'); }				
+			});			
+		});
+	},
+	disableKey: function(req, res, next) {
+		this.authorize(req, res, function() {
+			keyModel.disable(req.params.id, function(err) {
+				if (!err) { console.log('Success: disabling api key'); }
+				else { console.log('Error: disabling api key'); }				
+			});			
+		});
+	},
+	/**
+	 * This is the Authorize middleware. It
+	 * simply verifies if the user is logged
+	 * in. If the user is NOT logged in, it
+	 * responds with login view. Otherwise,
+	 * the callback is executed. 
+	 */
+	authorize: function(req, res, next) {
+		
 		var isAuthorized = (
 			req.session &&
 			req.session.mvc &&
@@ -55,10 +128,13 @@ module.exports = BaseController.extend({
 			req.body.password === this.password
 		);
 		
-		if (isAuthorized) {			
+		if (isAuthorized) {
+			//Store new session	
 			req.session.mvc = true;
 			req.session.save();
-			model.setDB(req.db);
+			//Attach db to models			
+			announModel.setDB(req.db);
+			keyModel.setDB(req.db);
 			next();
 		} else {
 			var v = new View(res, 'admin-login');

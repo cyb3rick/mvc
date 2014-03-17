@@ -1,0 +1,17 @@
+<% include header.html %>
+		<!-- Admin content here -->
+		<h1> <%= content %> </h1>		
+		
+		<p> <%= info %> </p>
+		
+	
+		<form method="post" action="/request/create">
+						
+			<input id="requestFullnameIn" type="text" name="fullname" placeholder="John Smith" />
+			<input id="requestEmailIn" type="text" name="email" placeholder="jsmith@company.com" />
+			<textarea id="requestMessageIn" name="message">I am from Civil Engineering and I am making a study on transportation systems. This information would help in such a study.</textarea>			
+			<input type="submit" value="Send Request" />
+														
+		</form>
+		
+<% include footer.html %>

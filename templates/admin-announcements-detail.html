@@ -1,0 +1,18 @@
+<% include header.html %>
+
+		<h1> <%= content %> </h1>
+		
+		<form method="post" action="/admin/announcements/update/<%= announ._id %>">
+						
+			<input id="announTitleIn" type="text" name="title" value="<%= announ.title %>" />			
+			<textarea id="announBodyIn" name="body"><%= announ.body %></textarea>						
+			<input type="date" name="startDate" value="<%= announ.startDate %>" />
+			<input type="date" name="endDate" value="<%= announ.endDate %>" />			
+			<input type="submit" value="Update" />
+								
+		</form>
+		
+		<a href="/admin/announcements/delete/<%= announ._id %>">Delete</a>
+		<a href="/admin/announcements">Back</a>
+
+<% include footer.html %>

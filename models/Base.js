@@ -13,5 +13,5 @@ module.exports.prototype = {
 	},
 	setDB: function(db) {
 		this.db = db;
-	}
+	}	
 };

@@ -1,0 +1,38 @@
+body {
+	font-family: Helvetica;
+}
+h1 {
+	font-size: 20px;
+	margin: 10px 0px;
+}
+h2 {
+	margin-bottom: 5px;
+}
+
+table {
+	border-collapse: collapse;
+	width: 600px;
+}	
+td, th {
+	
+	border: 1px solid #999;
+  	padding: 0.52px;
+  	text-align: left;
+}
+input[type=text], input[type=password], textarea{
+	display: block;
+	width: 600px;
+	border: 1px solid #eee;
+	box-sizing: border-box;	
+}
+button {
+	display:inline;
+}
+form textarea {
+	height: 150px;
+}
+#container {
+	margin: 0 auto;
+	width: 600px;	
+	border: 1px solid #eee;
+}

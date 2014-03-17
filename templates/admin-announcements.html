@@ -2,10 +2,25 @@
 
 		<h1> <%= content %> </h1>
 		
-		<ul>
+		<table>
+			<tr>
+				<th>Title</th>
+				<th>From</th>
+				<th>To</th>
+				<th>Actions</th>
+			</tr>			
+						
     		<% announcements.forEach(function(announ){ %>
-	      		<li> <%= announ.title %> </li>
-    		<% }) %>
-  		</ul>
+    		<tr>
+    			<td> <%= announ.title %> </td>
+    			<td> <%= announ.startDate.getMonth()+1 %>/<%= announ.startDate.getDate() %>/<%= announ.startDate.getFullYear() %> </td>
+    			<td> <%= announ.endDate.getMonth()+1 %>/<%= announ.endDate.getDate() %>/<%= announ.endDate.getFullYear() %> </td>
+    			<td>
+    				<a href="/admin/announcements/<%= announ._id %>">Edit</a>    				
+    			</td>
+    		</tr>	      		
+    		<% }) %>    		
+  		</table>
+  		<a href="/admin">Admin Panel</a>
 
 <% include footer.html %>

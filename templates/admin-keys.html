@@ -2,10 +2,33 @@
 		
 		<h1> <%= content %> </h1>
 			
-		<ul>
+		<table>
+			<tr>
+				<th>Owner</th>
+				<th>Key</th>
+				<th>Disabled</th>
+				<th>Actions</th>
+			</tr>			
+						
     		<% keys.forEach(function(key){ %>
-	      		<li>API Key (<%= key._id %>) [ <a href="#">disable</a> | <a href="#">delete</a> ]</li>
-    		<% }) %>
-  		</ul>
+    		<tr>
+    			<td> <%= key.fullname %> </td>
+    			<td> <%= key._id %> </td>
+    			<td> <%= key.disabled %> </td>
+    			<td>
+    			<% if (key.disabled === true) {
+    				%>
+    				<a href="/admin/keys/enable/<%= key._id %>">Enable</a>
+    				<%
+    			} else {
+    				%>
+    				<a href="/admin/keys/disable/<%= key._id %>">Disable</a>
+    				<%
+    			} %>    				
+    			</td>
+    		</tr>	      		
+    		<% }) %>    		
+  		</table>
+  		<a href="/admin">Admin Panel</a>
   		
 <% include footer.html %>

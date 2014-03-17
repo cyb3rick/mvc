@@ -27,7 +27,8 @@
   "dependencies": {    
     "express": "*",
     "ejs": "*",
-    "mongodb": "*"    
+    "mongodb": "*",
+ 	"moment": "*"  
   },
   "devDependencies": {
   	"jasmine-node": "*"    
