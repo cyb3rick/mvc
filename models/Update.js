@@ -1,11 +1,18 @@
+//*****************************************************************************
+//
+// Update.js    Model to represent location updates stored in DB.
+//
+// Notes		N/A
+//
+// Author	 	Erick Caraballo
+//
+//*****************************************************************************
+
 var Model = require('./Base');
-var crypto = require('crypto');
 var baseModel = new Model();
 
 var ObjectID = require('mongodb').ObjectID;
 
-//TODO: See if you can separate these functions
-//into separate models (i.e. AdminModel, AnnouncementModel, etc).
 var UpdateModel = baseModel.extend({	
 	findByYear: function(year, callback) {
 		//this.db.collection('updates').find({'year': year}).toArray(callback);

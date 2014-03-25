@@ -1,3 +1,7 @@
+// TODO: Look into recluster, a nodejs module
+// to create a cluster of processes running nodejs
+// so that it has zero downtime.
+
 var express = require('express');
 var app = express();
 var http = require('http');
@@ -23,24 +27,29 @@ app.set('view engine', 'html');
 var mongoURL = config.mongo.url;
 
 MongoClient.connect(mongoURL, function(err, db) {
+	
 	if (!err) {
-		//Controllers
+		// Connected successfully to DB.
+		
+		// Controllers
 		var AdminCtrl = require('./controllers/Admin');		
 		var RequestsCtrl = require('./controllers/Requests');
 		var RestApiCtrl = require('./controllers/RestAPI');
 
-		//Express middleware
+		// Express middleware
 		app.use(express.bodyParser());
 		app.use(express.cookieParser('superSecretString123'));
 		app.use(express.session());	
 						
-		//Custom middleware		
+		// Custom middleware
+		// Attaches the DB to the request object 
+		// so that controllers and models can access it		
 		var attachDB = function(req, res, next) {
 			req.db = db;
 			next();
 		};
 		
-		//Routes
+		//Routes - TODO: use specific methods (.get(), .post(), etc) instead of any method
 		//Display admin welcome panel
 		app.all('/admin', attachDB, function(req, res, next){ 
 			AdminCtrl.run(req, res, next);	
@@ -99,7 +108,8 @@ MongoClient.connect(mongoURL, function(err, db) {
 		//Start listening for HTTP requests
 		http.createServer(app).listen(config.port, function() {
 			console.log("Listening on port " + config.port);
-		});		
+		});
+				
 	} else {
 		console.log("Error: Connecting to database.");
 	}

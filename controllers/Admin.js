@@ -1,3 +1,15 @@
+//*****************************************************************************
+//
+// Admin.js   	Controller of the administration panel. It handles routes that 
+//				only administrator users can access.
+//
+// Notes		It uses the 'authorize' middleware to check for valid session
+//				before fulfilling any request.
+//
+// Author	 	Erick Caraballo
+//
+//*****************************************************************************
+
 var BaseController = require('./Base');
 var View = require('../views/Base');
 
@@ -12,7 +24,8 @@ module.exports = BaseController.extend({
 	name: 'Admin',
 	username: 'root', //TODO: Get this from db.
 	password: 'root',
-	run: function(req, res, next) {			
+	run: function(req, res, next) {
+					
 		this.authorize(req, res, function (){			
 			var v = new View(res, 'admin');
 			v.render({
@@ -20,10 +33,12 @@ module.exports = BaseController.extend({
 				content: 'Welcome to the Administration Panel'
 			});
 		});
+		
 	},
 	listAnnouncements: function(req, res, next) {
+		
 		this.authorize(req, res, function() {
-			announModel.findAll(function(err, documents) {
+			announModel.findAllAnnouncements(function(err, documents) {
 				if (!err) {			
 					var v = new View(res, 'admin-announcements');
 					v.render({
@@ -32,15 +47,20 @@ module.exports = BaseController.extend({
 						announcements: documents
 					});
 				}
+				else { 
+					console.log('Error: listAnnouncements -> ' + err);
+				}
 			});
 		});
+		
 	},
 	detailedAnnouncement: function(req, res, next) {
+		
 		// When I click one of the announcements
 		// a new view opens which lets me modify
 		// it or delete it.		
 		this.authorize(req, res, function() {			
-			announModel.findById(req.params.id, function(err, announ) {						
+			announModel.findAnnouncementById(req.params.id, function(err, announ) {						
 				if (!err) {																	
 					var v = new View(res, 'admin-announcements-detail');					
 					//Format dates for display
@@ -52,11 +72,15 @@ module.exports = BaseController.extend({
 						announ: announ
 					});							
 				}
-				else { console.log(err); }
+				else { 
+					console.log('Error: detailedAnnouncement -> ' + err);
+				}
 			});
-		});		
+		});
+		
 	},
 	updateAnnouncement: function(req, res, next) {
+		
 		this.authorize(req, res, function() {
 			var announ = {
 				'id': req.params.id,
@@ -65,57 +89,74 @@ module.exports = BaseController.extend({
 				'startDate': moment(req.body.startDate).toDate(),					
 				'endDate': moment(req.body.endDate).toDate()
 			};												
-			announModel.update(announ, function(err) {
-				if (!err) { console.log('Success: updating announcemet.'); }
-				else { console.log('Error: updating announcement.'); }
+			announModel.updateAnnouncement(announ, function(err) {				
+				if (err) { 
+					console.log('Error: updateAnnouncement -> ' + err);
+				}				
 			});
 		});
+
 	},
 	deleteAnnouncement: function(req, res, next) {
+		
 		this.authorize(req, res, function() {												
-			announModel.removeById(req.params.id, function(err) {
-				if (!err) { console.log('Success: removing announcement.'); }
-				else { console.log('Error: removing announcement.'); }
+			announModel.removeAnnouncementById(req.params.id, function(err) {
+				if (err) { 
+					console.log('Error: deleteAnnouncement -> ' + err); 
+				}
 			});
 		});
+		
 	},
 	listKeys: function(req, res, next) {
+		
 		this.authorize(req, res, function() {			
-			keyModel.getKeys(function(err, documents) {
-				if (!err) {			
+			keyModel.findAllKeys(function(err, documents) {
+				if (!err) {					
 					var v = new View(res, 'admin-keys');
 					v.render({
 						title: 'API Keys',
 						content: 'List of API Keys:',
 						keys: documents
 					});
+				} else {
+					console.log('Error: listKeys -> ' + err);
 				}
 			});			
 		});
+		
 	},
 	enableKey: function(req, res, next) {
+		
 		this.authorize(req, res, function() {
-			keyModel.enable(req.params.id, function(err) {
-				if (!err) { console.log('Success: enabling api key'); }
-				else { console.log('Error: enabling api key'); }				
+			keyModel.enableKey(req.params.id, function(err) {				
+				if (err) { 
+					console.log('Error: enableKey -> ' + err); 
+				}				
 			});			
 		});
+		
 	},
+	//*************************************************************************
+    // disableKey - Self-explanatory. This handler should be followed by a call
+    //				to listKeys
+    //*************************************************************************
 	disableKey: function(req, res, next) {
+		
 		this.authorize(req, res, function() {
-			keyModel.disable(req.params.id, function(err) {
-				if (!err) { console.log('Success: disabling api key'); }
-				else { console.log('Error: disabling api key'); }				
+			keyModel.disableKey(req.params.id, function(err) {
+				if (err) { 
+					console.log('Error: disableKey -> ' + err); 
+				}			
 			});			
 		});
+		
 	},
-	/**
-	 * This is the Authorize middleware. It
-	 * simply verifies if the user is logged
-	 * in. If the user is NOT logged in, it
-	 * responds with login view. Otherwise,
-	 * the callback is executed. 
-	 */
+	//*************************************************************************
+    // authorize - A middleware that verifies if the user is logged in. If the
+    //			   user isn't logged in, it returns the login view. Otherwise,
+    //			   the callback (next) is executed.
+    //*************************************************************************
 	authorize: function(req, res, next) {
 		
 		var isAuthorized = (
@@ -144,5 +185,6 @@ module.exports = BaseController.extend({
 				from: req.path			
 			});
 		}
+		
 	}
 });

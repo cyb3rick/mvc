@@ -10,10 +10,10 @@ var config = {
 	},
 	production: {
 		mode: 'production',
-		port: 3000,
+		port: 8000,
 		mongo: {
 			host: '127.0.0.1',
-			port: '33000',
+			port: '27017',
 			dbname: 'tt'			
 		}
 	}	
@@ -25,10 +25,8 @@ var config = {
 //config.mongo.url
 for (var mode in config) {
 	var mongoCnf = config[mode].mongo;
-	mongoCnf.url = 'mongodb://' + 
-						mongoCnf.host + ':' + 
-	 						mongoCnf.port + '/' + 
-	 							mongoCnf.dbname;
+	mongoCnf.url = 'mongodb://' + mongoCnf.host + ':' + 
+	 				mongoCnf.port + '/' + mongoCnf.dbname;
 }
 
 module.exports = function(mode) {

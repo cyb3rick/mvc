@@ -1,15 +1,18 @@
 var BaseController = require('./Base');
 var View = require('../views/Base');
 
+// A library for parsing, 
+// validating, manipulating, 
+// and formatting dates.
 var moment = require('moment');
 
 //Models
-//Remember, require('path/to/model') returns a constructor
 var keyModel = new (require('../models/Key'));
 
 module.exports = BaseController.extend({
 	name: 'Request API Key',
 	run: function(req, res, next) {
+		
 		//This references to a requests.html file in /templates		
 		var v = new View(res, 'requests'); 
 		v.render({
@@ -19,9 +22,11 @@ module.exports = BaseController.extend({
 				  'order to make REST API calls. If your ' + 
 				  'request is approved, a notification will ' +
 				  'be sent to the specified email address.'
-		});		
+		});
+		
 	},
 	createKeyRequest: function(req, res, next) {
+		
 		keyModel.setDB(req.db);
 		var keyRequest = {
 			'fullname': req.body.fullname,
@@ -30,12 +35,17 @@ module.exports = BaseController.extend({
 			'disabled': true	
 		};												
 		keyModel.create(keyRequest, function(err) {
-			if (!err) {
-				//TODO: Create another view to display feedback message and back button
-				res.end('Success: Request has been sent. If approved, you will be notified by email.'); 
+			if (!err) {				
+				res.end('Success: Request has been sent. '+
+						'If approved, you will be notified by email.');
 				console.log('Success: creating key request.'); 
 			}
-			else { console.log('Error: creating key request.'); }
+			else { 
+				//TODO: Create another view to display 
+				// 		feedback message and back button
+				console.log('Error: creating key request.'); 
+			}
 		});
+		
 	}
 });
