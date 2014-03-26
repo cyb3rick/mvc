@@ -49,7 +49,12 @@ MongoClient.connect(mongoURL, function(err, db) {
 			next();
 		};
 		
-		//Routes - TODO: use specific methods (.get(), .post(), etc) instead of any method
+		//Routes - TODO: use specific methods (.get(), .post(), etc) instead of any method		
+		//General User Routes
+		app.get('/', function(req, res, next){
+			res.render('home', {title:"Trolley Tracker"});
+		});
+		
 		//Display admin welcome panel
 		app.all('/admin', attachDB, function(req, res, next){ 
 			AdminCtrl.run(req, res, next);	

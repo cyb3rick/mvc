@@ -1,0 +1,204 @@
+<div data-role="panel" data-id="menu" data-hash="crumbs" data-context="a#default" style="overflow: hidden;">
+
+	<div data-role="page" id="main" data-hash="false" data-theme="a" style="overflow: hidden;">
+
+		<div data-role="header" data-position="fixed">
+			<h1>Menu</h1>
+		</div>
+
+		<div data-role="popup" id="login-popup" style="max-width:450px;">
+			<div data-role="header" data-position="fixed">
+				<h3>Login</h3>
+			</div>
+
+			<fieldset data-role="controlgroup" data-inset="true" style="padding: 40px 20px 20px 20px;">
+				<form id="login-form">
+					<label for="card-holder-name">Username:</label>
+					<input type="text" name="card-holder-name" id="card-holder-name" data-mini="true" maxlength="40"/>
+					<label for="card-num">Password:</label>
+					<input type="text" name="card-num" id="card-num" data-mini="true"/>
+				</form>
+			</fieldset>
+
+			<a href="index.html" data-role="button" data-rel="back" data-inline="true" data-inline="true">Cancel</a>
+			<a href="#admin-home" data-role="button" data-theme="b" data-transition="fade" data-inline="true">Log In</a>
+		</div>
+
+		<div data-role="popup" id="api-popup" style="max-width:450px;">
+			<div data-role="header" data-position="fixed">
+				<h3>Request API Key</h3>
+			</div>
+
+			<fieldset data-role="controlgroup" data-inset="true" style="padding: 40px 20px 20px 20px;">
+				<form id="login-form">
+					<label for="api-name">Name:</label>
+					<input type="text" name="api-name" id="api-name" data-mini="true" maxlength="40"/>
+					<label for="api-email">Email:</label>
+					<input type="text" name="api-email" id="api-email" data-mini="true" maxlength="40"/>
+					<div>
+						<label for="purpose">Purpose:</label>
+						<textarea id="purpose" name="purpose" rows="3"></textarea>
+					</div>
+				</form>
+			</fieldset>
+
+			<a href="index.html" data-role="button" data-rel="back" data-inline="true" data-inline="true">Cancel</a>
+			<a href="#" data-role="button" data-theme="b" data-transition="fade" data-inline="true">Log In</a>
+		</div>
+
+		<div data-role="content">
+			<ul data-role="listview">
+				<li>
+					Bus Arrival Times
+					<ul data-theme="a">
+						<li>
+							<label for="select-route" class="ui-hidden-accessible">Select Route</label>
+							<select name="select-route" id="select-route">
+								<option value="" data-placeholder="true">Select Route</option>
+								<option value="route1">Palacio</option>
+								<option value="route2">Zoologico</option>
+								<option value="route3">Interno</option>
+								<option value="route4">Terrace</option>
+								<option value="route5">Darlington</option>
+							</select>
+							<label for="select-stop" class="ui-hidden-accessible"></label>
+							<select name="select-stop" id="select-stop">
+								<option value="0" data-placeholder="true">Select Bus Stop</option>
+							</select>
+							<label for="follow-trolley">Follow Trolley</label>
+							<input type="checkbox" name="follow-trolley" id="follow-trolley" class="custom" value=true />
+							<br/>
+							<div id="calculate-eta" data-role="button" data-theme="e">
+								Calculate
+							</div>
+						</li>
+						<li id="eta-stop" style="display: none;"></li>
+						<li id="eta-route" style="display: none;"></li>
+						<li id="eta-eta" style="display: none;"></li>
+						<li>
+							<div id="eta-clear" data-role="button" data-theme="a" style="display: none;">
+								Clear ETA
+							</div>
+						</li>
+					</ul>
+				</li>
+				<li>
+					Map Options
+					<ul data-theme="a">
+						<li>
+							Toggle Routes
+							<ul data-theme="a">
+								<form id="route-form">
+									<div data-role="listview" data-inset="false" style="padding: 5px 25px 5px 25px; ">
+										<fieldset data-role="controlgroup" data-inset="true" style="position: relative; margin-bottom: -20px;">
+											<input type="radio" name="route-choice" id="route-1" value="route1" checked="checked" />
+											<label for="route-1">Palacio</label>
+											<input type="radio" name="route-choice" id="route-2" value="route2"/>
+											<label for="route-2">Zoologico</label>
+											<input type="radio" name="route-choice" id="route-3" value="route3"/>
+											<label for="route-3">Interno</label>
+											<input type="radio" name="route-choice" id="route-4" value="route4"/>
+											<label for="route-4">Terrace</label>
+											<input type="radio" name="route-choice" id="route-5" value="route5"/>
+											<label for="route-5">Darlington</label>
+										</fieldset>
+									</div>
+								</form>
+							</ul>
+						</li>
+						<li data-icon="false">
+							<a id="reset-map-view">Reset Map View</a>
+						</li>
+					</ul>
+				</li>
+				<li>
+					Service Info
+					<ul data-theme="a">
+						<li>
+							Palacio
+							<ul data-theme="a" style='font-size:12pt;'>
+								<li>
+									Monday thru Thursday:
+									<br />
+									<span style="font-weight: normal;">6:30am - 9:45pm</span>
+								</li>
+								<li>
+									Fridays:
+									<br />
+									<span style="font-weight: normal;">6:30am - 6:30pm</span>
+								</li>
+							</ul>
+						</li>
+						<li>
+							Zoologico
+							<ul data-theme="a" style='font-size:12pt;'>
+								<li>
+									Monday thru Friday:
+									<br />
+									<span style="font-weight: normal;">6:30am - 4:45pm</span>
+								</li>
+							</ul>
+						</li>
+						<li>
+							Interno
+							<ul data-theme="a" style='font-size:12pt;'>
+								<li>
+									Monday thru Thursday:
+									<br />
+									<span style="font-weight: normal;">6:30am - 9:45pm</span>
+								</li>
+								<li>
+									Fridays:
+									<br />
+									<span style="font-weight: normal;">6:30am - 6:30pm</span>
+								</li>
+							</ul>
+						</li>
+						<li>
+							Terrace
+							<ul data-theme="a" style='font-size:12pt;'>
+								<li>
+									Monday thru Thursday:
+									<br />
+									<span style="font-weight: normal;">6:30am - 9:45pm</span>
+								</li>
+								<li>
+									Fridays:
+									<br />
+									<span style="font-weight: normal;">6:30am - 6:30pm</span>
+								</li>
+							</ul>
+						</li>
+						<li>
+							Darlington
+							<ul data-theme="a" style='font-size:12pt;'>
+								<li>
+									Monday thru Friday:
+									<br />
+									<span style="font-weight: normal;">6:30am - 5:45pm</span>
+								</li>
+							</ul>
+						</li>
+					</ul>
+				</li>
+				<li>
+					<a href='#api-popup' data-rel="popup">Request API Key</a>
+				</li>
+				<li>
+					<a href="#login-popup" data-rel="popup">Admin Login</a>
+				</li>
+			</ul>
+		</div><!-- /content -->
+
+		<div data-role="footer" data-position="fixed" data-id="ew-footer">
+			<div data-role="navbar">
+				<ul>
+					<li>
+						<a href="#" data-transition="slideup">Exit</a>
+					</li>
+				</ul>
+			</div><!-- /navbar -->
+			<h2 class="ui-splitview-hidden">TechTrinkets Inc. 2014</h2>
+		</div><!-- /footer -->
+	</div><!-- /page -->
+</div><!-- panel menu -->

@@ -14,7 +14,6 @@ table {
 	width: 600px;
 }	
 td, th {
-	
 	border: 1px solid #999;
   	padding: 0.52px;
   	text-align: left;
@@ -30,9 +29,4 @@ button {
 }
 form textarea {
 	height: 150px;
-}
-#container {
-	margin: 0 auto;
-	width: 600px;	
-	border: 1px solid #eee;
 }

@@ -3,9 +3,43 @@
 	<head>
 		<meta charset="UTF-8">
 		<title> <%= title %> </title>
-		<link rel="stylesheet" href="/css/reset.css" />
-		<link rel="stylesheet" href="/css/style.css" />	
+		<link rel="stylesheet" href="/css/style.css" />		
+		<link rel="stylesheet" href="/css/jquery-mobile/jquery.mobile.css" />
+		<link rel="stylesheet" href="/css/jquery-splitview/jquery.mobile.splitview.css" />		
+		<link rel="stylesheet" href="/css/jquery-mobile/custom.css" />
+				
+		<!-- NOTE: See what can be moved to below body for faster loading -->
+		<script type="text/javascript" src="/js/vendor/jquery-1.7.1.js"></script>
+		<script type="text/javascript" src="https://maps.googleapis.com/maps/api/js?libraries=geometry&sensor=false"></script>
+		<script type="text/javascript" src="/js/jquery-splitview/jquery.mobile.splitview.js"></script>
+		<script type="text/javascript" src="/js/jquery-mobile/jquery.mobile.js"></script>	
+		<script type="text/javascript" src="/js/app/func.js"></script>
+		<script type="text/javascript" src="/js/app/vars.js"></script>	
+		<script>
+			// TODO: Get this out of here
+			function initialize() {
+				var UPRM = new google.maps.LatLng(18.209438, -67.140543);
+				
+				var mapOptions = {
+					zoom : 17,
+					minZoom : 16,
+					maxZoom : 18,
+					center : UPRM,
+					mapTypeId : google.maps.MapTypeId.ROADMAP,
+					disableDefaultUI : true
+				};
+				
+				map = new google.maps.Map(document.getElementById('map-canvas'), mapOptions);
+
+				initStopMarkers();
+				initRoutes();
+				initSimulatorStuff();
+				initGeolocation();
+			}
+			google.maps.event.addDomListener(window, "load", initialize);
+
+		</script>	
 	</head>	
 	
 	<body>
-	<div id="container">
+	
