@@ -1,0 +1,30 @@
+#admin-buttons a {
+	padding: 10px;
+}
+.odd {
+	background-color : #EEEEEE;
+	color : black;
+	text-align : center;
+	height : 30px;
+	padding-top : 5px;
+	font-weight: bold;
+	font-size: 16px;
+}
+.even {
+	background-color : #CCCCCC;
+	color : black;
+	text-align : center;
+	height : 30px;
+	padding-top : 5px;
+	font-weight:bold;
+	font-size: 16px;
+}
+
+#content {
+	padding: 0;
+	position: absolute !important;
+	top: 40px !important;
+	right: 0;
+	bottom: 40px !important;
+	left: 0 !important;
+}
