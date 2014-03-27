@@ -14,31 +14,7 @@
 		<script type="text/javascript" src="/js/jquery-splitview/jquery.mobile.splitview.js"></script>
 		<script type="text/javascript" src="/js/jquery-mobile/jquery.mobile.js"></script>	
 		<script type="text/javascript" src="/js/app/func.js"></script>
-		<script type="text/javascript" src="/js/app/vars.js"></script>	
-		<script>
-			// TODO: Get this out of here
-			function initialize() {
-				var UPRM = new google.maps.LatLng(18.209438, -67.140543);
-				
-				var mapOptions = {
-					zoom : 17,
-					minZoom : 16,
-					maxZoom : 18,
-					center : UPRM,
-					mapTypeId : google.maps.MapTypeId.ROADMAP,
-					disableDefaultUI : true
-				};
-				
-				map = new google.maps.Map(document.getElementById('map-canvas'), mapOptions);
-
-				initStopMarkers();
-				initRoutes();
-				initSimulatorStuff();
-				initGeolocation();
-			}
-			google.maps.event.addDomListener(window, "load", initialize);
-
-		</script>	
+		<script type="text/javascript" src="/js/app/vars.js"></script>
 	</head>	
 	
 	<body>
