@@ -35,10 +35,11 @@ module.exports = BaseController.extend({
 			'disabled': true	
 		};												
 		keyModel.createKey(keyRequest, function(err) {
-			if (!err) {				
-				res.end('Success: Request has been sent. '+
-						'If approved, you will be notified by email.');
-				console.log('Success: creating key request.'); 
+			if (!err) {
+				// Debug				
+				console.log('Success: creating key request.');				
+				// Send message 				
+				res.redirect('/requests');								
 			}
 			else { 
 				//TODO: Create another view to display 

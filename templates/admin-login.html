@@ -1,16 +1,25 @@
 <% include header.html %>
-		<!-- Admin Login content here -->
-		<h1> <%= content %> </h1>
+
+<!-- Login content here -->
+<div data-role="page" id="page1">
+	<div data-role="header">
+		<h1><%= content %></h1>
+	</div>
+
+	<div role="main" class="ui-content">
+
 		<!--
-			The <%= from %> is so that when I access
-			/admin/whatever and I'm shown the login
-			view bc I'm logged out, when I log in, I'll
-			be shown what I was trying to access in the
-			first place and not thrown somewhere else.			
+		The <%= from %> is so that when I access
+		/admin/whatever and I'm shown the login
+		view bc I'm logged out, when I log in, I'll
+		be shown what I was trying to access in the
+		first place and not thrown somewhere else.
 		-->
 		<form method="post" action="<%= from %>">
 			<input type="text" name="username" />
 			<input type="password" name="password" />
 			<input type="submit" value="Login" />
-		</form>		
+		</form>
+	</div>
+</div>
 <% include footer.html %>
