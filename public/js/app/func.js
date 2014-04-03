@@ -10,24 +10,22 @@ function initialize() {
 		disableDefaultUI : true
 	};
 	
-	map = new google.maps.Map(document.getElementById('map-canvas'), mapOptions);
+	map = new google.maps.Map(document.getElementById('map_canvas'), mapOptions);
 
 	initStopMarkers();
 	initRoutes();
 	//initSimulatorStuff();
-    var nodes = createNodes((new google.maps.Polyline({path : interno_trolley})).getPath(),80);
-    
-    nodes = nodes.getArray();
+    //var nodes = createNodes((new google.maps.Polyline({path : interno_trolley})).getPath(),80);
+    //console.log(nodes["markers"]);
+
+	//var seg1 = createDirectedArray(nodes["markers"],0,12);
+	//var seg2 = createDirectedArray(nodes["markers"],11,nodes["markers"].length-1);
 	
-	var seg1 = createDirectedArray(nodes,0,11);
+	//var seg1_json = JSON.stringify(seg1);
+	//var seg2_json = JSON.stringify(seg2);
 	
-	var seg2 = createDirectedArray(nodes,12,nodes.length-2);
-	
-	var seg1_json = JSON.stringify(seg1);
-	var seg2_json = JSON.stringify(seg2);
-	
-	seg1.reverse();
-	
+	//seg1.reverse();
+	/*
 	$.each(seg1, function(i){
 		seg1[i].reverse();
 	});
@@ -37,17 +35,66 @@ function initialize() {
 	$.each(seg2, function(i){
 		seg2[i].reverse();
 	});
-
-	console.log(seg1_json);
-	console.log(JSON.stringify(seg1));
-	console.log(seg2_json);
-	console.log(JSON.stringify(seg2));
+	*/
 	
-	console.log(JSON.stringify(JSON.parse(seg1_json).concat(seg1)));
-	
+	//var arr = concatDirArrays(JSON.parse(seg1_json),seg1);
+	//arr = concatDirArrays(arr,JSON.parse(seg2_json));
+	//console.log(JSON.stringify(concatDirArrays(arr)));
 }
 
 google.maps.event.addDomListener(window, "load", initialize);
+
+/*
+$(document).on('click', "#admin-login-button", function() {
+	//$.mobile.changePage("#admin-home", {reloadPage : true});
+	adminLogin();
+});
+
+function adminLogin(){
+	$.mobile.loading("show");
+	$.ajax({
+		url : "http://localhost:8080/admin" ,
+		method: 'post',
+		contentType: "application/json",
+		success : function(data,textStatus,jqXHR){
+			$.mobile.changePage("#admin-home",{reloadPage : true});
+		},
+		error : function(data,textStatus,jqXHR){
+			//$("#register-invalid").replaceWith("<br /><p id='invalid' style='color:red'>"+data.responseText+"</p>");
+			$.mobile.loading("hide");
+			//alert(data.responseText);	
+			alert("Ooops!");		
+		}
+	});
+};
+*/
+
+function concatDirArrays(arr1,arr2){
+	var missing_link = [];
+	var new_array;
+	
+	if (arguments.length == 1) {
+		if(arr1[arr1.length-1][1] != arr1[0][0]){
+			missing_link = [[arr1[arr1.length-1][1],arr1[0][0]]];
+			new_array = arr1.concat(missing_link);
+		}
+		else{
+			console.log("Array is closed already. No changes made.");
+			return;
+		}
+	} else {
+		if(arr1[arr1.length-1][1] != arr2[0][0]){
+			missing_link = [[arr1[arr1.length-1][1],arr2[0][0]]];
+			new_array = arr1.concat(missing_link).concat(arr2);
+		}
+		else{
+			new_array = arr1.concat(arr2);
+			console.log("Arrays were concatenated.");
+		}
+	}
+	
+	return new_array;
+}
 
 //push and shift for queue
 //input index breakpoints (return point)
@@ -57,7 +104,9 @@ function createDirectedArray(nodes,offset,breakpoint){
 	var i = 0;
 
 	while(breakpoint > 0 && nodes.length > 0){
+		console.log([i+offset,i+1+offset]);
 		path_cw.push([i+offset,i+1+offset]);	
+		nodes[0].setVisible(false);
 		nodes.shift();
 		breakpoint--;
 		i++;
@@ -77,6 +126,7 @@ function createNodes(rpath,threshold){
 	var coords = [];
 	var temp;
 	var foundNeighbor;
+	var marker_array = [];
 	
 	for(var i=0; i < rpath.getLength(); i++){
 		coords.push(rpath.getAt(i));
@@ -84,6 +134,7 @@ function createNodes(rpath,threshold){
 			lastMarkerPos = rpath.getAt(i);
 			temp = new google.maps.Marker({position : lastMarkerPos, map: map, title: "marker"+(placedMarkerPos.getPath().length)});
 			temp.setMap(map);
+			marker_array.push(temp);
 			placedMarkerPos.getPath().push(lastMarkerPos);
 		}
 		else if(google.maps.geometry.spherical.computeLength(coords) > threshold){
@@ -99,6 +150,7 @@ function createNodes(rpath,threshold){
 				lastMarkerPos = rpath.getAt(i);
 				temp = new google.maps.Marker({position : lastMarkerPos, map: map, title: "marker"+(placedMarkerPos.getPath().length)});
 				temp.setMap(map);
+				marker_array.push(temp);
 				placedMarkerPos.getPath().push(lastMarkerPos);
 				coords = [];
 			}
@@ -107,7 +159,7 @@ function createNodes(rpath,threshold){
 	
 	exec_time = Math.round(((new Date()).getTime() - t1));
 	console.log("Done! 'createNodes' finished execution in "+exec_time+" ms. New array is "+placedMarkerPos.getPath().getLength()+ " points long.");
-	return placedMarkerPos.getPath();
+	return ({"latlngs" : placedMarkerPos.getPath(), "markers" : marker_array});
 }
 
 /**
@@ -680,7 +732,23 @@ function initSimulatorStuff(){
 /// UI Event Listeners ---------------------------------------------------------------------------------------------///
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-$(document).on('click', "#my-location-button", function() {
+$(document).on('click', "#menu-eta", function() {
+	$( "#menu-panel" ).panel( "close" );
+	$( "#eta-popup" ).popup( "open" );
+});
+
+$(document).on('click', "#menu-routes", function() {
+	$( "#menu-panel" ).panel( "close" );
+	$( "#routes-popup" ).popup( "open" );
+});
+
+$(document).on('click', "#menu-service", function() {
+	$( "#menu-panel" ).panel( "close" );
+	$( "#service-popup" ).popup( "open" );
+});
+
+$(document).on('click', "#menu-location", function() {
+	$( "#menu-panel" ).panel( "close" );
 	initGeolocation();
 });
 
@@ -689,10 +757,7 @@ $(document).on('click', "#reset-map-view", function() {
   	map.setZoom(17);
 });
 
-$(document).on('click', "#admin-login", function() {
-	$.mobile.changePage("#admin-home", {reloadPage : true});
-});
-
+/*
 $(document).on('click', "#eta-clear", function() {
 	$( "#eta-stop"  ).empty();
 	$( "#eta-route" ).empty();
@@ -708,7 +773,7 @@ $(document).on('click', "#eta-clear", function() {
 		'height': '6px',
 	});
 });
-
+*/
 $(document).on('click', "#calculate-eta", function() {
 	var the_stop = $('#select-stop').val();
 	var the_route = $('#select-route').val();
@@ -716,13 +781,13 @@ $(document).on('click', "#calculate-eta", function() {
 	if(the_stop != "" && the_route != ""){
 		the_route = ShowRoute(the_route);
 		the_stop = ShowStop(the_stop);
-		$( "#eta-stop" ).html("Stop: "+the_stop.getTitle());
-		$( "#eta-route" ).html("Route: "+the_route.title);
-		$( "#eta-eta" ).html("ETA: 10 min");
-		$( "#eta-stop" ).css({	'display': 'block' });
-		$( "#eta-route" ).css({ 'display': 'block' });
-		$( "#eta-eta" ).css({	'display': 'block' });
-		$( "#eta-clear" ).css({	'display': 'block' });
+		//$( "#eta-stop" ).html("Stop: "+the_stop.getTitle());
+		//$( "#eta-route" ).html("Route: "+the_route.title);
+		//$( "#eta-eta" ).html("ETA: 10 min");
+		//$( "#eta-stop" ).css({	'display': 'block' });
+		//$( "#eta-route" ).css({ 'display': 'block' });
+		//$( "#eta-eta" ).css({	'display': 'block' });
+		//$( "#eta-clear" ).css({	'display': 'block' });
 		var html = "<div class=ui-grid-b>";
 		html +=   "<div class=ui-block-a><center>Stop: "+the_stop.getTitle()+"</center></div>";
 		html +=   "<div class=ui-block-b><center>Route: "+the_route.title+"</center></div>";
@@ -739,18 +804,8 @@ $(document).on('click', "#calculate-eta", function() {
 	}
 });
 
-$(document).on('change', "#follow-trolley", function() {
-	if($('#follow-trolley').is(':checked')){
-		$(document).on('change', "#follow-trolley", function() {
-		});
-	}
-});
-
-$(document).on('change', "#route-form", function() {
-    $('input:radio[name="route-choice"]').change(
-    function(){
-	   	ShowRoute($(this).val());
-	});
+$(document).on('change', 'input:radio[name="route-choice"]', function() {
+	ShowRoute($(this).val());
 });
 
 $(document).on('change', "#select-route", function() {

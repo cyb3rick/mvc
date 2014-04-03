@@ -1,0 +1,117 @@
+<div data-role="page" id="home">
+	<!--left menu panel-->
+	<div data-role="panel" id="menu-panel" data-position="left" data-display="overlay" data-theme="b">
+		<h3 id="menu-header">Main Menu</h3>
+		<div data-role="listview">
+			<li id="menu-eta"><a href="#eta-popup" data-rel="popup">Bus Arrival Times</a></li>
+			<li id="menu-routes"><a href="#routes-popup" data-rel="popup">Show Routes</a></li>
+			<li id="menu-service"><a href="#service-popup" data-rel="popup">Service Hours</a></li>
+			<li id="menu-location"><a href="#location-popup" data-rel="popup">My Location</a></li>
+			<li id="menu-api-key"><a href="/request">Request API Key</a></li>
+			<li id="menu-admin-login"><a href="/admin">Admin Login</a></li>
+		</div>
+	</div><!--/left panel-->
+	
+	<div data-role="header" data-theme="b">
+		<a href="#menu-panel" data-role="button" data-icon="bars" data-mini="true" data-inline="true">Menu</a>
+    	<h4>UPRM TrolleyTracker</h4>
+    	<a href="#routes-popup" data-role="button" data-rel="popup" data-icon="info" data-mini="true" data-inline="true">Info</a>
+	</div>
+	
+	<div data-role="content" id="content">
+		<!--decorative red bar below header-->
+		<div data-theme="b" id="eta-bar"></div>
+		<div id="map_canvas"></div>
+		
+		<!--ETA popup-->
+		<div data-role="popup" id="eta-popup" data-theme="b" data-overlay-theme="c" class="ui-content" data-transition="pop">
+			<a href="#" data-rel="back" data-role="button" data-theme="c" data-icon="delete" data-iconpos="notext" class="ui-btn-right">Close</a>
+			<h4>Select Route and Stop</h4>
+			<label for="select-route" class="ui-hidden-accessible">Select Route</label>
+			<select name="select-route" id="select-route" data-placeholder="true">
+				<option value="">Select Route</option>
+				<option value="route1">Palacio</option>
+				<option value="route2">Zoologico</option>
+				<option value="route3">Interno</option>
+				<option value="route4">Terrace</option>
+				<option value="route5">Darlington</option>
+			</select>
+			<label for="select-stop" class="ui-hidden-accessible">Select Stop</label>
+			<select name="select-stop" id="select-stop" data-placeholder="true">
+				<option value="0">Select Bus Stop</option>
+			</select>
+			<br/>
+			<a id="calculate-eta" data-role="button" data-theme="b">Calculate</a>
+		</div><!--/popup-->
+		
+		<!--Toggle Routes popup--> 
+		<div data-role="popup" id="routes-popup" data-theme="b" data-overlay-theme="c" class="ui-content" data-transition="pop">
+			<a href="#" data-rel="back" data-role="button" data-theme="c" data-icon="delete" data-iconpos="notext" class="ui-btn-right">Close</a>
+			<h4>Select Route</h4>
+			<form id="route-form">
+				<fieldset data-role="controlgroup" data-inset="true">
+					<input type="radio" name="route-choice" id="route-1" value="route1" checked="checked" />
+					<label for="route-1">Palacio</label>
+					<input type="radio" name="route-choice" id="route-2" value="route2"/>
+					<label for="route-2">Zoologico</label>
+					<input type="radio" name="route-choice" id="route-3" value="route3"/>
+					<label for="route-3">Interno</label>
+					<input type="radio" name="route-choice" id="route-4" value="route4"/>
+					<label for="route-4">Terrace</label>
+					<input type="radio" name="route-choice" id="route-5" value="route5"/>
+					<label for="route-5">Darlington</label>
+				</fieldset>
+			</form>
+		</div><!--/popup-->
+		
+		<!--Service Hours popup--> 
+		<div data-role="popup" id="service-popup" data-theme="b" data-overlay-theme="c" class="ui-content" data-transition="pop">
+			<a href="#" data-rel="back" data-role="button" data-theme="c" data-icon="delete" data-iconpos="notext" class="ui-btn-right">Close</a>
+			<h4>Service Hours</h4>
+			<div data-role="collapsible-set">
+				<div data-role="collapsible" data-collapsed="false">
+					<h3>Route 1 - Palacio</h3>
+					<p>Monday thru Thursday:<br />
+					<span class="hours">6:30am - 9:45pm</span></p>
+					<p>Fridays:<br />
+					<span class="hours">6:30am - 6:30pm</span></p>
+				</div>
+				<div data-role="collapsible">
+					<h3>Route 2 - Zoologico</h3>
+					<p>Monday thru Thursday:<br />
+					<span class="hours">6:30am - 9:45pm</span></p>
+					<p>Fridays:<br />
+					<span class="hours">6:30am - 6:30pm</span></p>
+				</div>
+				<div data-role="collapsible">
+					<h3>Route 3 - Interno</h3>
+					<p>Monday thru Thursday:<br />
+					<span class="hours">6:30am - 9:45pm</span></p>
+					<p>Fridays:<br />
+					<span class="hours">6:30am - 6:30pm</span></p>
+				</div>
+				<div data-role="collapsible">
+					<h3>Route 4 - Terrace</h3>
+					<p>Monday thru Thursday:<br />
+					<span class="hours">6:30am - 9:45pm</span></p>
+					<p>Fridays:<br />
+					<span class="hours">6:30am - 6:30pm</span></p>
+				</div>
+				<div data-role="collapsible">
+					<h3>Route 5 - Darlington</h3>
+					<p>Monday thru Thursday:<br />
+					<span class="hours">6:30am - 9:45pm</span></p>
+					<p>Fridays:<br />
+					<span class="hours">6:30am - 6:30pm</span></p>
+				</div>
+			</div>
+		</div><!--/popup-->
+		
+		<div data-role="popup" id="location-popup" data-theme="b" data-overlay-theme="c" class="ui-content" data-transition="pop">
+			<a href="#" data-rel="back" data-role="button" data-theme="c" data-icon="delete" data-iconpos="notext" class="ui-btn-right">Close</a>
+			<h4>My Location</h4>
+			<p></p>
+		</div><!--/popup-->
+		
+	</div><!--/content-->
+</div><!--home-->
