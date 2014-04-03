@@ -14,10 +14,101 @@ function initialize() {
 
 	initStopMarkers();
 	initRoutes();
-	initSimulatorStuff();
+	//initSimulatorStuff();
+    var nodes = createNodes((new google.maps.Polyline({path : interno_trolley})).getPath(),80);
+    
+    nodes = nodes.getArray();
+	
+	var seg1 = createDirectedArray(nodes,0,11);
+	
+	var seg2 = createDirectedArray(nodes,12,nodes.length-2);
+	
+	var seg1_json = JSON.stringify(seg1);
+	var seg2_json = JSON.stringify(seg2);
+	
+	seg1.reverse();
+	
+	$.each(seg1, function(i){
+		seg1[i].reverse();
+	});
+	
+	seg2.reverse();
+	
+	$.each(seg2, function(i){
+		seg2[i].reverse();
+	});
+
+	console.log(seg1_json);
+	console.log(JSON.stringify(seg1));
+	console.log(seg2_json);
+	console.log(JSON.stringify(seg2));
+	
+	console.log(JSON.stringify(JSON.parse(seg1_json).concat(seg1)));
+	
 }
 
 google.maps.event.addDomListener(window, "load", initialize);
+
+//push and shift for queue
+//input index breakpoints (return point)
+function createDirectedArray(nodes,offset,breakpoint){
+	var the_offset = offset;
+	var path_cw = [];
+	var i = 0;
+
+	while(breakpoint > 0 && nodes.length > 0){
+		path_cw.push([i+offset,i+1+offset]);	
+		nodes.shift();
+		breakpoint--;
+		i++;
+	}
+	
+	return path_cw;
+}
+
+//create markers every 'thresh' meters IFF there are no nearby markers within thresh meters
+//converts path to a set of nodes
+function createNodes(rpath,threshold){
+	var t1 = (new Date()).getTime();
+	var exec_time;
+	
+	var placedMarkerPos = new google.maps.Polyline();
+	var lastMarkerPos;
+	var coords = [];
+	var temp;
+	var foundNeighbor;
+	
+	for(var i=0; i < rpath.getLength(); i++){
+		coords.push(rpath.getAt(i));
+		if(i==0){
+			lastMarkerPos = rpath.getAt(i);
+			temp = new google.maps.Marker({position : lastMarkerPos, map: map, title: "marker"+(placedMarkerPos.getPath().length)});
+			temp.setMap(map);
+			placedMarkerPos.getPath().push(lastMarkerPos);
+		}
+		else if(google.maps.geometry.spherical.computeLength(coords) > threshold){
+			foundNeighbor = false;
+			for(var index = placedMarkerPos.getPath().getLength()-1; index >= 0; index--){
+				//if there is already a point nearby
+				if(google.maps.geometry.spherical.computeDistanceBetween(rpath.getAt(i),placedMarkerPos.getPath().getAt(index)) < threshold){
+					foundNeighbor = true;
+					break;
+				}
+			}
+			if(!foundNeighbor){
+				lastMarkerPos = rpath.getAt(i);
+				temp = new google.maps.Marker({position : lastMarkerPos, map: map, title: "marker"+(placedMarkerPos.getPath().length)});
+				temp.setMap(map);
+				placedMarkerPos.getPath().push(lastMarkerPos);
+				coords = [];
+			}
+		}
+	}
+	
+	exec_time = Math.round(((new Date()).getTime() - t1));
+	console.log("Done! 'createNodes' finished execution in "+exec_time+" ms. New array is "+placedMarkerPos.getPath().getLength()+ " points long.");
+	return placedMarkerPos.getPath();
+}
 
 /**
  *	Description:
@@ -33,8 +124,8 @@ google.maps.event.addDomListener(window, "load", initialize);
  * 	The length of the segment of the route between trolley and stop locations.
  */
 function getDistanceAcrossPath(slatlng,tlatlng,rpath,tdir){
-	var res1 = closestPointOnPath(slatlng,rpath);
-	var res2 = closestPointOnPath(tlatlng,rpath);
+	var res1 = closestPointOnPath(rpath,slatlng);
+	var res2 = closestPointOnPath(rpath,tlatlng);
 	
 	if(res2.dist > 20){	
 		console.log("The coordinate(s) are too far away from path, cannot continue.");
@@ -69,27 +160,59 @@ function getDistanceAcrossPath(slatlng,tlatlng,rpath,tdir){
  * 	Identifies the coordinates on a route that are closest to a trolley.
  * 	
  * 	Params:
- *	latlng - coordinates of trolley
  * 	path - the path of the route
+ * 	latlng - coordinates of trolley
+ * 	latlng2 (optional) - coordinates of the trolley on the previous (second to last) update
  * 
  * 	Returns:
  * 	An object containing the coordinates of the point on the route closest to the trolley (coords) and the index of the 
  * 	  coordinates on the path array (theindex).
+ *	If two latlngs are passed as parameters, in addition to respective indexes, distances and coordinates, the function 
+ * 	calculates the direction the trolley is moving with respect to the path.
  */
-function closestPointOnPath(latlng,path){
-	var coord = path.getAt(0);
-	var theindex;
-	var temp;
-
-	for(index = 1; index < path.length; index++){
-		temp = google.maps.geometry.spherical.computeDistanceBetween(latlng,path.getAt(index));
-		if(temp < google.maps.geometry.spherical.computeDistanceBetween(latlng,coord)){
-			coord = path.getAt(index);
-			theindex = index;
+function closestPointOnPath(path,latlng,latlng2){
+	if (arguments.length == 2) {
+		var coord = (new google.maps.Polyline({ path: path})).getPath().getAt(0);
+		var theindex;
+		var temp;
+	
+		for(index = 1; index < path.length; index++){
+			temp = google.maps.geometry.spherical.computeDistanceBetween(latlng,path.getAt(index));
+			if(temp < google.maps.geometry.spherical.computeDistanceBetween(latlng,coord)){
+				coord = path.getAt(index);
+				theindex = index;
+			}
 		}
+		var dist = google.maps.geometry.spherical.computeDistanceBetween(latlng,coord);
+		return {"coord":coord,"dist":dist,"index":theindex};
+	
+	} else if (arguments.length == 3){
+		var coord1 = path[0];
+		var coord2 = path[0];
+		var theindex1;
+		var theindex2;
+		var temp;
+		var dir;
+	
+		for(index = 1; index < path.length; index++){
+			temp = google.maps.geometry.spherical.computeDistanceBetween(latlng,path[index]);
+			if(temp < google.maps.geometry.spherical.computeDistanceBetween(latlng,coord1)){
+				coord1 = path[index];
+				theindex1 = index;
+			}
+			
+			temp = google.maps.geometry.spherical.computeDistanceBetween(latlng2,path[index]);
+			
+			if(temp < google.maps.geometry.spherical.computeDistanceBetween(latlng2,coord2)){
+				coord2 = path[index];
+				theindex2 = index;
+			}
+		}
+		var dist1 = google.maps.geometry.spherical.computeDistanceBetween(latlng,coord1);
+		var dist2 = google.maps.geometry.spherical.computeDistanceBetween(latlng,coord2);
+		dir = (theindex1 > theindex2 ? 1 : (theindex1 == theindex2 ? 0 : -1));
+		return {"curr_coord":coord1,"prev_coord":coord2,"curr_dist":dist1,"prev_dist":dist2,"curr_index":theindex1,"prev_index":theindex2,"dir":dir};
 	}
-	var dist = google.maps.geometry.spherical.computeDistanceBetween(latlng,coord);
-	return {"coord":coord,"dist":dist,"index":theindex};
 }
 
 /**
@@ -107,10 +230,12 @@ function animateMarker(tmarker,tmarker_path,rpoly,slatlng,dir) {
 	if (arguments.length == 3) {
 		var coords;
 		var index = 0;
+		var lastEta = -1;
+		var thisEta = 0;
 		setInterval(function() {
 			coords = tmarker_path[index % tmarker_path.length];
 			index++;
-			tmarker.setVisible(google.maps.geometry.poly.isLocationOnEdge(coords, rpoly, 0.0005));
+			//tmarker.setVisible(google.maps.geometry.poly.isLocationOnEdge(coords, rpoly, 0.0005));
 			tmarker.setPosition(coords);
 		}, 100);
 	} else if (arguments.length == 5) {
@@ -119,11 +244,14 @@ function animateMarker(tmarker,tmarker_path,rpoly,slatlng,dir) {
 		setInterval(function() {
 			tlatlng = tmarker_path[index % tmarker_path.length];
 			index++;
-			tmarker.setVisible(google.maps.geometry.poly.isLocationOnEdge(tlatlng, rpoly, 0.0005));
+			//tmarker.setVisible(google.maps.geometry.poly.isLocationOnEdge(tlatlng, rpoly, 0.0005));
 			tmarker.setPosition(tlatlng);
 			var dist = getDistanceAcrossPath(slatlng,tlatlng,rpoly.getPath(),dir);
-			//console.log(Math.round(dist.len));
-			console.log("ETA: "+Math.round(getETA(dist.len,45))+" seconds");
+			thisEta = Math.round(getETA(dist.len,45));
+			if(lastEta != thisEta){
+				console.log("ETA: "+thisEta+" seconds");
+			}
+			lastEta = Math.round(getETA(dist.len,45));
 		}, 100);
 	}
 }
@@ -137,6 +265,15 @@ function animateMarker(tmarker,tmarker_path,rpoly,slatlng,dir) {
  */
 function getETA(distance,velocity){
 	return distance/velocity;
+}
+
+/**
+ *	Description:
+ *	Determines whether a trolley is moving in CCW or CW manner with respect to a route.
+ * 	
+ */
+function getDirection(past_latlng,curr_latlng,rpath){
+	
 }
 
 /**
@@ -531,11 +668,16 @@ function initSimulatorStuff(){
 	var interno_poly = new google.maps.Polyline({path : interno_trolley, map: map});
 	route3_trolley.setMap(map);
 	//animateMarker(route3_trolley,interno_trolley,route_array[2].value);
-	animateMarker(route3_trolley,interno_trolley,interno_poly,stop_array[2].value.getPosition(),0);
+	animateMarker(route3_trolley,interno_trolley,interno_poly,stop_array[2].value.getPosition(),1);
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Event Listeners --------------------------------------------------------------------------------------------------//
+/// GMaps Event Listeners-------------------------------------------------------------------------------------------///
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+/// UI Event Listeners ---------------------------------------------------------------------------------------------///
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 $(document).on('click', "#my-location-button", function() {
