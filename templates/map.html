@@ -15,8 +15,19 @@
 	<div data-role="header" data-theme="b">
 		<a href="#menu-panel" data-role="button" data-icon="bars" data-mini="true" data-inline="true">Menu</a>
     	<h4>UPRM TrolleyTracker</h4>
-    	<a href="#routes-popup" data-role="button" data-rel="popup" data-icon="info" data-mini="true" data-inline="true">Info</a>
+    	<a href="#options-panel" data-role="button" data-rel="popup" data-icon="gear" data-mini="true" data-inline="true">Options</a>
 	</div>
+	
+	<!--right menu panel-->
+	<div data-role="panel" id="options-panel" data-position="right" data-display="overlay" data-theme="b">
+		<h3 id="menu-header">Options</h3>
+		<div data-role="listview">
+			<li id="options-reset"><a>Reset Map View</a></li>
+			<li id="options-show-all"><a>Show Active Trolleys</a></li>
+			<li id="options-show-all-routes"><a>Toggle All Routes On/Off</a></li>
+			<li id="options-announcements"><a>Show Announcements</a></li>
+		</div>
+	</div><!--/right panel-->
 	
 	<div data-role="content" id="content">
 		<!--decorative red bar below header-->
@@ -112,6 +123,5 @@
 			<h4>My Location</h4>
 			<p></p>
 		</div><!--/popup-->
-		
 	</div><!--/content-->
 </div><!--home-->

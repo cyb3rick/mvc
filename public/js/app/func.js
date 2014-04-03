@@ -752,9 +752,30 @@ $(document).on('click', "#menu-location", function() {
 	initGeolocation();
 });
 
-$(document).on('click', "#reset-map-view", function() {
+$(document).on('click', "#options-reset", function() {
     map.setCenter(new google.maps.LatLng(18.209438, -67.140543));
   	map.setZoom(17);
+});
+
+$(document).on('click', "#options-show-all-routes", function() {
+	var allon = true;
+    $.each(route_array, function(i){
+    	if(route_array[i].value.getVisible() == false){
+    		allon = false;
+    	}
+    });
+    
+    if(allon){
+    	$.each(route_array, function(j){
+			route_array[j].value.setVisible(false);
+	    });
+    } else {
+	    $.each(route_array, function(j){
+			route_array[j].value.setVisible(true);
+	    });
+    }
+    
+    
 });
 
 /*
@@ -798,6 +819,8 @@ $(document).on('click', "#calculate-eta", function() {
 	        'height': '22px',
 	        'color': '#FFFFFF'
 	    });
+	    
+	    $("#eta-popup").popup("close");
 	}
 	else{
 		alert("Please select both a route and a stop.");
