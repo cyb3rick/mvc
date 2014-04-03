@@ -51,43 +51,44 @@ MongoClient.connect(mongoURL, function(err, db) {
 		
 		//Routes - TODO: use specific methods (.get(), .post(), etc) instead of any method		
 		//General User Routes
-		app.get('/', function(req, res, next){
+		app.get('/', function(req, res, next){			
 			res.render('home', {title:"Trolley Tracker"});
 		});
 		
 		//Display admin welcome panel
-		app.all('/admin', attachDB, function(req, res, next){ 
+		app.all('/admin', attachDB, function(req, res, next){			
 			AdminCtrl.run(req, res, next);	
 		});
-		//Page to list all announcements
-		app.all('/admin/announcements', attachDB, function(req, res, next) {
+		//Page to list announcements and respective controls
+		app.all('/admin/announcements', attachDB, function(req, res, next) {			
 			AdminCtrl.listAnnouncements(req, res, next);
 		});
-		//Page to edit an announcement
+		//Creates announcement
+		app.all('/admin/announcements/create', attachDB, function(req, res, next) {			
+			AdminCtrl.createAnnouncement(req, res, next);
+		});
+		//Page to display detailed info of an announcement
 		app.all('/admin/announcements/:id', attachDB, function(req, res, next) {
 			//Detailed view of announcement
 			//Provides view with options to update or delete announcements			
 			AdminCtrl.detailedAnnouncement(req, res, next);			
 		});		
-		app.all('/admin/announcements/update/:id', attachDB, function(req, res, next) {			
+		app.all('/admin/announcements/update/:id', attachDB, function(req, res, next) {
+			console.log('/updateAnn');						
 			AdminCtrl.updateAnnouncement(req, res, next);			
-			res.redirect('/admin/announcements');
 		});
 		app.all('/admin/announcements/delete/:id', attachDB, function(req, res, next) {
 			AdminCtrl.deleteAnnouncement(req, res, next);			
-			res.redirect('/admin/announcements');
 		});
 		//Page to list api keys
 		app.all('/admin/keys', attachDB, function(req, res, next){
 			AdminCtrl.listKeys(req, res, next);
 		});				
 		app.all('/admin/keys/enable/:id', attachDB, function(req, res, next){
-			AdminCtrl.enableKey(req, res, next);
-			res.redirect('/admin/keys');
+			AdminCtrl.enableKey(req, res, next);			
 		});	
 		app.all('/admin/keys/disable/:id', attachDB, function(req, res, next){
-			AdminCtrl.disableKey(req, res, next);
-			res.redirect('/admin/keys');
+			AdminCtrl.disableKey(req, res, next);			
 		});			
 		//Request API key
 		app.get('/request', attachDB, function(req, res, next) {

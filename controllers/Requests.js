@@ -34,7 +34,7 @@ module.exports = BaseController.extend({
 			'message': req.body.message,
 			'disabled': true	
 		};												
-		keyModel.create(keyRequest, function(err) {
+		keyModel.createKey(keyRequest, function(err) {
 			if (!err) {				
 				res.end('Success: Request has been sent. '+
 						'If approved, you will be notified by email.');

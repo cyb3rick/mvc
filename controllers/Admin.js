@@ -81,6 +81,8 @@ module.exports = BaseController.extend({
 	},
 	updateAnnouncement: function(req, res, next) {
 		
+		console.log("update");
+		
 		this.authorize(req, res, function() {
 			var announ = {
 				'id': req.params.id,
@@ -92,7 +94,26 @@ module.exports = BaseController.extend({
 			announModel.updateAnnouncement(announ, function(err) {				
 				if (err) { 
 					console.log('Error: updateAnnouncement -> ' + err);
-				}				
+				}	
+				res.redirect('/admin/announcements');			
+			});
+		});
+
+	},
+	createAnnouncement: function(req, res, next) {
+				
+		this.authorize(req, res, function() {
+			var announ = {				
+				'title': req.body.title,
+				'body': req.body.body,
+				'startDate': moment(req.body.startDate).toDate(),					
+				'endDate': moment(req.body.endDate).toDate()
+			};												
+			announModel.insertAnnouncement(announ, function(err) {				
+				if (err) { 
+					console.log('Error: createAnnouncement -> ' + err);
+				}	
+				res.redirect('/admin/announcements');			
 			});
 		});
 
@@ -104,6 +125,7 @@ module.exports = BaseController.extend({
 				if (err) { 
 					console.log('Error: deleteAnnouncement -> ' + err); 
 				}
+				res.redirect('/admin/announcements');
 			});
 		});
 		
@@ -133,6 +155,7 @@ module.exports = BaseController.extend({
 				if (err) { 
 					console.log('Error: enableKey -> ' + err); 
 				}				
+				res.redirect('/admin/keys');				
 			});			
 		});
 		
@@ -147,7 +170,8 @@ module.exports = BaseController.extend({
 			keyModel.disableKey(req.params.id, function(err) {
 				if (err) { 
 					console.log('Error: disableKey -> ' + err); 
-				}			
+				}
+				res.redirect('/admin/keys');
 			});			
 		});
 		

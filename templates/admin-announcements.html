@@ -1,26 +1,71 @@
 <% include header.html %>
 
-		<h1> <%= content %> </h1>
-		
-		<table>
-			<tr>
-				<th>Title</th>
-				<th>From</th>
-				<th>To</th>
-				<th>Actions</th>
-			</tr>			
+<!-- Announcements content here -->
+<div data-role="page" id="page1">
+	<div data-role="header">
+		<h1><%= content %></h1>
+	</div>
+
+	<div role="main" class="ui-content">
+
+		<!-- Accordion for create announcement form -->
+		<div data-role="collapsibleset" data-content-theme="a" data-iconpos="right" id="insert">
+			<div data-role="collapsible" id="set1" data-collapsed="true">
+
+				<h3>Create Announcement</h3>
+
+				<!-- Add announcement form -->
+				<form method="put" action="/admin/announcements/create">
+					<label for="text-basic">Title of Announcement</label>
+					<input id="announTitleIn" type="text" name="title" />
+					<label for="textarea">Message</label>
+					<textarea id="announBodyIn" name="body"></textarea>
+					<label for="date">Start Date</label>
+					<input type="date" name="startDate" />
+					<label for="date">End Date</label>
+					<input type="date" name="endDate" />
+					<input type="submit" value="Create Announcement" />
+					<input type="reset" value="Reset" />
+				</form><!-- /form -->
+
+			</div>
+		</div><!-- /collapsibleset -->
+
+		<!-- Table of announcements -->
+		<table id="announcementsTable" data-role="table" data-mode="" class="ui-responsive ui-shadow table-stroke">
+			<thead>
+				<tr class="ui-bar-d">
+					<th>Title</th>
+					<th>From</th>
+					<th>To</th>
+					<th>Actions</th>
+				</tr>
+			</thead>
+			<tbody>
+				<% announcements.forEach(function(announ){ %>
+				<tr>
+					<td><%= announ.title %></td>
+					<td><%= announ.startDate.getMonth()+1 %>/<%= announ.startDate.getDate() %>/<%= announ.startDate.getFullYear() %></td>
+					<td><%= announ.endDate.getMonth()+1 %>/<%= announ.endDate.getDate() %>/<%= announ.endDate.getFullYear() %></td>
+					<td>
+						<div data-role="controlgroup" data-type="horizontal" data-mini="true">
+							
+							<a href="/admin/announcements/<%= announ._id %>" class="ui-btn ui-corner-all ui-icon-edit ui-btn-icon-left"> Edit</a>
+							<a href="/admin/announcements/delete/<%= announ._id %>" class="ui-btn ui-corner-all ui-icon-delete ui-btn-icon-left"> Delete</a>
+						</div>
+							
 						
-    		<% announcements.forEach(function(announ){ %>
-    		<tr>
-    			<td> <%= announ.title %> </td>
-    			<td> <%= announ.startDate.getMonth()+1 %>/<%= announ.startDate.getDate() %>/<%= announ.startDate.getFullYear() %> </td>
-    			<td> <%= announ.endDate.getMonth()+1 %>/<%= announ.endDate.getDate() %>/<%= announ.endDate.getFullYear() %> </td>
-    			<td>
-    				<a href="/admin/announcements/<%= announ._id %>">Edit</a>    				
-    			</td>
-    		</tr>	      		
-    		<% }) %>    		
-  		</table>
-  		<a href="/admin">Admin Panel</a>
+						<!--<a href="/admin/announcements/<%= announ._id %>" class="ui-btn ui-mini ui-btn-active">Edit</a>-->
+					
+					</td>
+				</tr>
+				<% }) %>
+			</tbody>
+		</table><!-- /table -->
+		
+		<a href="/admin" data-role="button" data-inline="true" data-icon="back">Admin Panel</a>
+		
+	</div>
+</div>
 
 <% include footer.html %>

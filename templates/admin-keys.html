@@ -1,34 +1,40 @@
-<% include header.html %>		
-		
-		<h1> <%= content %> </h1>
-			
-		<table>
-			<tr>
-				<th>Owner</th>
-				<th>Key</th>
-				<th>Disabled</th>
-				<th>Actions</th>
-			</tr>			
-						
-    		<% keys.forEach(function(key){ %>
-    		<tr>
-    			<td> <%= key.fullname %> </td>
-    			<td> <%= key._id %> </td>
-    			<td> <%= key.disabled %> </td>
-    			<td>
-    			<% if (key.disabled === true) {
-    				%>
-    				<a href="/admin/keys/enable/<%= key._id %>">Enable</a>
-    				<%
-    			} else {
-    				%>
-    				<a href="/admin/keys/disable/<%= key._id %>">Disable</a>
-    				<%
-    			} %>    				
-    			</td>
-    		</tr>	      		
-    		<% }) %>    		
-  		</table>
-  		<a href="/admin">Admin Panel</a>
-  		
+<% include header.html %>
+
+<!-- Keys content here -->
+<div data-role="page" id="page1">
+	<div data-role="header">
+		<h1><%= content %></h1>
+	</div>
+
+	<div role="main" class="ui-content">
+		<table id="keysTable" data-role="table" data-mode="" class="ui-responsive ui-shadow table-stroke">
+			<thead>
+				<tr class="ui-bar-d">
+					<th>Owner</th>
+					<th>Key</th>
+					<th>Disabled</th>
+					<th>Actions</th>
+				</tr>
+			</thead>
+			<tbody>
+				<% keys.forEach(function(key){ %>
+				<tr>
+					<td> <%= key.fullname %> </td>
+					<td> <%= key._id %> </td>
+					<td> <%= key.disabled %> </td>
+					<td> <% if (key.disabled === true) {
+					%> <a href="/admin/keys/enable/<%= key._id %>" class="ui-btn ui-mini ui-btn-active">Enable</a> <%
+					} else {
+					%> <a href="/admin/keys/disable/<%= key._id %>" class="ui-btn ui-mini">Disable</a> <%
+					} %> </td>
+				</tr>
+				<% }) %>
+			</tbody>
+		</table>
+
+		<a href="/admin" data-role="button" data-inline="true" data-icon="back">Admin Panel</a>
+
+	</div>
+</div>
 <% include footer.html %>
+

@@ -1,18 +1,25 @@
 <% include header.html %>
 
-		<h1> <%= content %> </h1>
-		
+<!-- Announcements content here -->
+<div data-role="page" id="page1">
+	<div data-role="header">
+		<h1><%= content %></h1>
+	</div>
+	<div role="main" class="ui-content">
+
 		<form method="post" action="/admin/announcements/update/<%= announ._id %>">
-						
-			<input id="announTitleIn" type="text" name="title" value="<%= announ.title %>" />			
-			<textarea id="announBodyIn" name="body"><%= announ.body %></textarea>						
+
+			<input id="announTitleIn" type="text" name="title" value="<%= announ.title %>" />
+			<textarea id="announBodyIn" name="body"><%= announ.body %></textarea>
 			<input type="date" name="startDate" value="<%= announ.startDate %>" />
-			<input type="date" name="endDate" value="<%= announ.endDate %>" />			
+			<input type="date" name="endDate" value="<%= announ.endDate %>" />
 			<input type="submit" value="Update" />
-								
+
 		</form>
 		
-		<a href="/admin/announcements/delete/<%= announ._id %>">Delete</a>
-		<a href="/admin/announcements">Back</a>
-
+		<!-- Back btn -->
+		<a href="/admin/announcements" data-role="button" data-inline="true" data-icon="back">Announcements</a>
+				
+	</div>
+</div>
 <% include footer.html %>
