@@ -49,7 +49,8 @@ MongoClient.connect(mongoURL, function(err, db) {
 			next();
 		};
 		
-		//Routes - TODO: use specific methods (.get(), .post(), etc) instead of any method		
+		//Routes - TODO: use specific methods (.get(), .post(), etc) instead 
+		// of any method		
 		//General User Routes
 		app.get('/', function(req, res, next){			
 			res.render('home', {title:"Trolley Tracker"});
@@ -73,8 +74,7 @@ MongoClient.connect(mongoURL, function(err, db) {
 			//Provides view with options to update or delete announcements			
 			AdminCtrl.detailedAnnouncement(req, res, next);			
 		});		
-		app.all('/admin/announcements/update/:id', attachDB, function(req, res, next) {
-			console.log('/updateAnn');						
+		app.all('/admin/announcements/update/:id', attachDB, function(req, res, next) {			
 			AdminCtrl.updateAnnouncement(req, res, next);			
 		});
 		app.all('/admin/announcements/delete/:id', attachDB, function(req, res, next) {
@@ -101,9 +101,15 @@ MongoClient.connect(mongoURL, function(err, db) {
 		app.get('/updates', attachDB, function(req, res, next) {
 			RestApiCtrl.run(req, res, next);
 		});	
-		app.get('/updates/:key/:year', attachDB, function(req, res, next) {
+		/*app.get('/updates/:key/:year', attachDB, function(req, res, next) {
 			RestApiCtrl.listByYear(req, res, next);
-		});	
+		});*/	
+
+		//Get trolley updates based on query
+		app.get('/updates', attachDB, function(req, res, next) {
+			// TODO: implement method in RestApiCtrl			
+		});
+			
 		/*app.get('/updates/:year/:month', attachDB, function(req, res, next) {
 			RestApiCtrl.listByMonth(req, res, next);
 		});	

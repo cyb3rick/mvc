@@ -17,7 +17,8 @@
 
 var BaseController = require('./Base');
 
-var View = require('../views/Base');
+var BaseView = require('../views/Base');
+var JSONView = require('../views/JSONView');
 
 // A library for parsing, 
 // validating, manipulating, 
@@ -31,15 +32,28 @@ var updateModel = new (require('../models/Update'));
 module.exports = BaseController.extend({
 	name: 'REST API',
 	run: function(req, res, next) {
-		
-		//This references to a requests.html file in /templates		
-		var v = new View(res, 'rest-api'); 
-		v.render({
-			title: 'REST API',
-			content: 'Information about the REST API',
-			info: 'In order to make calls to the REST API '+
-				  'a valid API key must be provided.'
-		});	
+		//Act depend on route components
+		if (req.query && req.query.key) {			
+			if (req.query.year && req.query.month && req.query.day) {
+				this.listByDay(req, res, next);	
+			}
+			else if (req.query.year && req.query.month){
+				this.listByMonth(req, res, next);
+			}
+			else if (req.query.year) {
+				this.listByYear(req, res, next);
+			}			
+		}		
+		else {
+			//This references to a requests.html file in /templates		
+			var v = new BaseView(res, 'rest-api'); 
+			v.render({
+				title: 'REST API',
+				content: 'Information about the REST API',
+				info: 'In order to make calls to the REST API '+
+				  		'a valid API key must be provided.'
+			});
+		}	
 			
 	},
 	//*************************************************************************
@@ -49,25 +63,72 @@ module.exports = BaseController.extend({
 				
 		this.validate(req, res, function() {
 			// Route contained a valid API key
-			if (req.params && req.params.year) {
-				// Route contains a year
-				// TODO: validate year using moment library				
-				updateModel.findByYear(req.params.year, function(err,updates) {
-					if (!err) {
-						var v = new View(res, 'rest-api-updates'); 
-						v.render({
-							title: 'REST API',
-							content: 'Information about the REST API',
-							info: 'In order to make calls to the REST API '+
-								  'a valid API key must be provided.',
-							updates: updates 				 
-						});				
-					} else {			
-						res.send(500, err);
-						console.log("Error: listByYear -> findByYear -> " + err);					
-					}					
-				});
-			}
+			
+			// TODO: Validate year		
+			updateModel.findByYear(req.query.year, function(err, updatesFound) {
+				if (!err) {
+					// Create a JSON view, pass in any _valid_ template
+					// as it won't be used. We'll return raw JSON					
+					var v = new JSONView(res, 'rest-api');
+					v.render(updatesFound);
+				}
+				else {
+					res.send(500, err);
+					console.log("Error: listByYear -> findByYear -> " + err);					
+				}
+			});			
+		});
+		
+	},	
+	//*************************************************************************
+    // listByMonth - A handler to get updates of specified year and month.
+    //*************************************************************************
+	listByMonth: function(req, res, next) {
+				
+		this.validate(req, res, function() {
+			// Route contained a valid API key
+			
+			// TODO: Validate year and month	
+			updateModel.findByMonth(req.query.year, req.query.month, function(err, updatesFound) {
+				if (!err) {
+					// Create a JSON view, pass in any _valid_ template
+					// as it won't be used. We'll return raw JSON					
+					var v = new JSONView(res, 'rest-api');
+					v.render(updatesFound);
+				}
+				else {
+					res.send(500, err);
+					console.log("Error: listByYear -> findByMonth -> " + err);					
+				}
+			});			
+		});
+		
+	},
+	//*************************************************************************
+    // listByDay - A handler to get updates of specified year, month and day.
+    //*************************************************************************
+	listByDay: function(req, res, next) {
+				
+		this.validate(req, res, function() {
+			// Route contained a valid API key
+			
+			// TODO: Validate parameters
+			var year = req.query.year;
+			var month = req.query.month;
+			var day = req.query.day;
+				
+			updateModel.findByDay(year, month, day, function(err, updatesFound) {
+				if (!err) {
+					// Create a JSON view, pass in any _valid_ template
+					// as it won't be used. We'll return raw JSON					
+					var v = new JSONView(res, 'rest-api');
+					v.render(updatesFound);
+				}
+				else {
+					res.send(500, err);
+					console.log("Error: listByYear -> findByDay -> " + err);					
+				}
+			});			
 		});
 		
 	},	
@@ -83,7 +144,7 @@ module.exports = BaseController.extend({
 		keyModel.setDB(req.db);
 				
 		// Try to find key in DB
-		keyModel.findKeyById(req.params.key, function(err, key) {
+		keyModel.findKeyById(req.query.key, function(err, key) {
 			if (!err) {
 				// Key exits in DB
 				if (key[0] && key[0].disabled === false) {

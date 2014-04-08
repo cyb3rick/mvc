@@ -80,9 +80,7 @@ module.exports = BaseController.extend({
 		
 	},
 	updateAnnouncement: function(req, res, next) {
-		
-		console.log("update");
-		
+				
 		this.authorize(req, res, function() {
 			var announ = {
 				'id': req.params.id,

@@ -9,10 +9,12 @@ module.exports = function(response, template) {
 };
 module.exports.prototype = {
 	extend: function(properties) {
-		var Child = module.exports;
-		//TODO: Is this line really necessary? \/
-		Child.prototype = module.exports.prototype;
-		for (var key in properties) {
+		var Child = function(response, template) {
+			this.response = response;
+			this.template = template;
+		};
+		Child.prototype = new module.exports();
+		for(var key in properties) {
 			Child.prototype[key] = properties[key];
 		}
 		return Child;

@@ -38,14 +38,13 @@ module.exports = BaseController.extend({
 			if (!err) {
 				// Debug				
 				console.log('Success: creating key request.');				
-				// Send message 				
-				res.redirect('/requests');								
 			}
 			else { 
 				//TODO: Create another view to display 
 				// 		feedback message and back button
 				console.log('Error: creating key request.'); 
 			}
+			res.redirect('/request');							
 		});
 		
 	}
