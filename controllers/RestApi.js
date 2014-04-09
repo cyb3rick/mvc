@@ -49,9 +49,9 @@ module.exports = BaseController.extend({
 			var v = new BaseView(res, 'rest-api'); 
 			v.render({
 				title: 'REST API',
-				content: 'Information about the REST API',
-				info: 'In order to make calls to the REST API '+
-				  		'a valid API key must be provided.'
+				content: 'Information about the REST API',				
+				queryFormat: '/updates?key=<your_api_key>&year=<yyyy>[&month=<mm>[&day=<dd>]]',
+				requestsURL: '/request'		
 			});
 		}	
 			

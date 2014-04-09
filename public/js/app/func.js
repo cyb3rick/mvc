@@ -816,8 +816,7 @@ $(document).on('click', "#calculate-eta", function() {
 		html += "</div>";
 		$( "#eta-bar" ).html(html);
 	    $('#eta-bar').css({
-	        'height': '22px',
-	        'color': '#FFFFFF'
+	        'height': '22px'	        
 	    });
 	    
 	    $("#eta-popup").popup("close");
