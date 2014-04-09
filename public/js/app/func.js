@@ -14,8 +14,14 @@ function initialize() {
 
 	initStopMarkers();
 	initRoutes();
-	//initSimulatorStuff();
-    //var nodes = createNodes((new google.maps.Polyline({path : interno_trolley})).getPath(),80);
+	initSimulatorStuff();
+	//all = interno_trolley.concat(Terrace).concat(Darlington).concat(Zoologico).concat(Palacio);
+    //var nodes = createNodes((new google.maps.Polyline({path : all})).getPath(),75);
+    //35-biblioteca
+    //34- patio
+    
+	//var zoo_ccw = [12,13,14,15,16,17,59,68,69,70,71,72,73,74,75,76,75,74,73,72,71,70,69,68,59,60,61,62,63,64,65,66,65,64,67,0];
+    //var int_ccw = [28,27,26,25,24,23,22,21,20,19,18,17,16,15,14,13,12,0,1,2,3,4,5,6,7,8,9,10,29,11,29,10,9,8,7,6,5,4,3,2,1,0];
     //console.log(nodes["markers"]);
 
 	//var seg1 = createDirectedArray(nodes["markers"],0,12);
@@ -228,7 +234,7 @@ function closestPointOnPath(path,latlng,latlng2){
 		var theindex;
 		var temp;
 	
-		for(index = 1; index < path.length; index++){
+		for(var index = 0; index < path.length; index++){
 			temp = google.maps.geometry.spherical.computeDistanceBetween(latlng,path.getAt(index));
 			if(temp < google.maps.geometry.spherical.computeDistanceBetween(latlng,coord)){
 				coord = path.getAt(index);
@@ -293,6 +299,7 @@ function animateMarker(tmarker,tmarker_path,rpoly,slatlng,dir) {
 	} else if (arguments.length == 5) {
 		var tlatlng;
 		var index = 0;
+		var res;
 		setInterval(function() {
 			tlatlng = tmarker_path[index % tmarker_path.length];
 			index++;
@@ -303,6 +310,9 @@ function animateMarker(tmarker,tmarker_path,rpoly,slatlng,dir) {
 			if(lastEta != thisEta){
 				console.log("ETA: "+thisEta+" seconds");
 			}
+			
+			
+			
 			lastEta = Math.round(getETA(dist.len,45));
 		}, 100);
 	}
@@ -422,7 +432,11 @@ function ShowRoute(the_route){
 			the_route = route_array[route].value;
 		}
 	});
+	route3_trolley.setVisible(false);
 	the_route.setVisible(true);
+	if(route_array[2].value.getVisible()){
+		route3_trolley.setVisible(true);
+	}
 	centerOnPath(the_route.getPath(),map);
 	return {"poly":the_route,"title":title};
 }
@@ -514,6 +528,7 @@ function initRoutes(){
 		{	key: "route1", title: "Palacio", 
 			stops: ["pala","barc","port","stef","pati"],
 			value:	new google.maps.Polyline({
+			visible : false,
 			path : Palacio,
 			strokeColor : '#FF0000',
 			strokeOpacity : 0.6,
@@ -557,7 +572,7 @@ function initRoutes(){
 		{	key: "route5", title: "Darlington",
 			stops: ["darl","entr","gimn","bibl"],
 			value:	new google.maps.Polyline({
-			visible : false,
+			visible : true,
 			path : Darlington,
 			strokeColor : '#00FF00',
 			strokeOpacity : 0.6,
@@ -712,12 +727,14 @@ function initStopMarkers(){
 function initSimulatorStuff(){
 	var bus = '../css/images/icons-simple/bus.png';
 
-	var route3_trolley = new google.maps.Marker({
+	route3_trolley = new google.maps.Marker({
 		position : interno_trolley[0],
 		title : "interno_trolley",
-		icon: bus
+		icon: bus,
+		visible : false
 	});
-	var interno_poly = new google.maps.Polyline({path : interno_trolley, map: map});
+	
+	var interno_poly = new google.maps.Polyline({path : interno_trolley, map: map, visible : false});
 	route3_trolley.setMap(map);
 	//animateMarker(route3_trolley,interno_trolley,route_array[2].value);
 	animateMarker(route3_trolley,interno_trolley,interno_poly,stop_array[2].value.getPosition(),1);
@@ -776,6 +793,13 @@ $(document).on('click', "#options-show-all-routes", function() {
     }
     
     
+});
+
+$(document).on('click', "#options-clear-eta", function() {	
+	$("#eta-bar").empty();
+	$("#eta-bar").css({
+		'height': '6px',
+	});
 });
 
 /*
