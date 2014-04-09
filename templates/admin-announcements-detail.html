@@ -7,7 +7,7 @@
 	</div>
 	<div role="main" class="ui-content">
 
-		<form method="post" action="/admin/announcements/update/<%= announ._id %>">
+		<form method="post" action="/admin/announcements/update/<%= announ._id %>" data-ajax="false">
 
 			<input id="announTitleIn" type="text" name="title" value="<%= announ.title %>" />
 			<textarea id="announBodyIn" name="body"><%= announ.body %></textarea>
@@ -18,7 +18,7 @@
 		</form>
 		
 		<!-- Back btn -->
-		<a href="/admin/announcements" data-role="button" data-inline="true" data-icon="back">Announcements</a>
+		<a href="/admin/announcements" data-ajax="false" data-role="button" data-inline="true" data-icon="back">Announcements</a>
 				
 	</div>
 </div>

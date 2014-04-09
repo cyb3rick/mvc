@@ -34,7 +34,7 @@ MongoClient.connect(mongoURL, function(err, db) {
 		// Controllers
 		var AdminCtrl = require('./controllers/Admin');		
 		var RequestsCtrl = require('./controllers/Requests');
-		var RestApiCtrl = require('./controllers/RestAPI');
+		var RestApiCtrl = require('./controllers/RestApi');
 
 		// Express middleware
 		app.use(express.bodyParser());
@@ -60,15 +60,13 @@ MongoClient.connect(mongoURL, function(err, db) {
 		app.all('/admin', attachDB, function(req, res, next){			
 			AdminCtrl.run(req, res, next);	
 		});
-		//Page to list announcements and respective controls
+		//Admin announcements
 		app.all('/admin/announcements', attachDB, function(req, res, next) {			
 			AdminCtrl.listAnnouncements(req, res, next);
-		});
-		//Creates announcement
+		});		
 		app.all('/admin/announcements/create', attachDB, function(req, res, next) {			
 			AdminCtrl.createAnnouncement(req, res, next);
-		});
-		//Page to display detailed info of an announcement
+		});		
 		app.all('/admin/announcements/:id', attachDB, function(req, res, next) {
 			//Detailed view of announcement
 			//Provides view with options to update or delete announcements			
@@ -80,7 +78,7 @@ MongoClient.connect(mongoURL, function(err, db) {
 		app.all('/admin/announcements/delete/:id', attachDB, function(req, res, next) {
 			AdminCtrl.deleteAnnouncement(req, res, next);			
 		});
-		//Page to list api keys
+		//Admin API keys
 		app.all('/admin/keys', attachDB, function(req, res, next){
 			AdminCtrl.listKeys(req, res, next);
 		});				
@@ -89,34 +87,19 @@ MongoClient.connect(mongoURL, function(err, db) {
 		});	
 		app.all('/admin/keys/disable/:id', attachDB, function(req, res, next){
 			AdminCtrl.disableKey(req, res, next);			
-		});			
-		//Request API key
+		});				
+		//Request API keys
 		app.get('/request', attachDB, function(req, res, next) {
 			RequestsCtrl.run(req, res, next);	
 		});		
 		app.post('/request/create', attachDB, function(req, res, next) {
 			RequestsCtrl.createKeyRequest(req, res, next);			
-		});	
+		});		
 		//REST API
 		app.get('/updates', attachDB, function(req, res, next) {
 			RestApiCtrl.run(req, res, next);
 		});	
-		/*app.get('/updates/:key/:year', attachDB, function(req, res, next) {
-			RestApiCtrl.listByYear(req, res, next);
-		});*/	
-
-		//Get trolley updates based on query
-		app.get('/updates', attachDB, function(req, res, next) {
-			// TODO: implement method in RestApiCtrl			
-		});
 			
-		/*app.get('/updates/:year/:month', attachDB, function(req, res, next) {
-			RestApiCtrl.listByMonth(req, res, next);
-		});	
-		app.get('/updates/:year/:month/:day', attachDB, function(req, res, next) {
-			RestApiCtrl.listByDay(req, res, next);
-		});*/
-				
 		//Start listening for HTTP requests
 		http.createServer(app).listen(config.port, function() {
 			console.log("Listening on port " + config.port);

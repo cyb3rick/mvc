@@ -15,7 +15,7 @@
 				<h3>Create Announcement</h3>
 
 				<!-- Add announcement form -->
-				<form method="put" action="/admin/announcements/create">
+				<form method="post" action="/admin/announcements/create" data-ajax="false">
 					<label for="text-basic">Title of Announcement</label>
 					<input id="announTitleIn" type="text" name="title" />
 					<label for="textarea">Message</label>
@@ -48,22 +48,17 @@
 					<td><%= announ.startDate.getMonth()+1 %>/<%= announ.startDate.getDate() %>/<%= announ.startDate.getFullYear() %></td>
 					<td><%= announ.endDate.getMonth()+1 %>/<%= announ.endDate.getDate() %>/<%= announ.endDate.getFullYear() %></td>
 					<td>
-						<div data-role="controlgroup" data-type="horizontal" data-mini="true">
-							
-							<a href="/admin/announcements/<%= announ._id %>" class="ui-btn ui-corner-all ui-icon-edit ui-btn-icon-left"> Edit</a>
-							<a href="/admin/announcements/delete/<%= announ._id %>" class="ui-btn ui-corner-all ui-icon-delete ui-btn-icon-left"> Delete</a>
-						</div>
-							
-						
-						<!--<a href="/admin/announcements/<%= announ._id %>" class="ui-btn ui-mini ui-btn-active">Edit</a>-->
-					
+						<div data-role="controlgroup" data-type="horizontal" data-mini="true">							
+							<a href="/admin/announcements/<%= announ._id %>" class="ui-btn ui-corner-all ui-icon-edit ui-btn-icon-left" data-ajax="false"> Edit</a>
+							<a href="/admin/announcements/delete/<%= announ._id %>" class="ui-btn ui-corner-all ui-icon-delete ui-btn-icon-left" data-ajax="false"> Delete</a>
+						</div>											
 					</td>
 				</tr>
 				<% }) %>
 			</tbody>
 		</table><!-- /table -->
 		
-		<a href="/admin" data-role="button" data-inline="true" data-icon="back">Admin Panel</a>
+		<a href="/admin" data-ajax="false" data-role="button" data-inline="true" data-icon="back">Admin Panel</a>
 		
 	</div>
 </div>

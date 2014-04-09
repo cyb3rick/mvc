@@ -23,16 +23,16 @@
 					<td> <%= key._id %> </td>
 					<td> <%= key.disabled %> </td>
 					<td> <% if (key.disabled === true) {
-					%> <a href="/admin/keys/enable/<%= key._id %>" class="ui-btn ui-mini ui-btn-active">Enable</a> <%
+					%> <a href="/admin/keys/enable/<%= key._id %>" class="ui-btn ui-mini ui-btn-active" data-ajax="false">Enable</a> <%
 					} else {
-					%> <a href="/admin/keys/disable/<%= key._id %>" class="ui-btn ui-mini">Disable</a> <%
+					%> <a href="/admin/keys/disable/<%= key._id %>" class="ui-btn ui-mini" data-ajax="false">Disable</a> <%
 					} %> </td>
 				</tr>
 				<% }) %>
 			</tbody>
 		</table>
 
-		<a href="/admin" data-role="button" data-inline="true" data-icon="back">Admin Panel</a>
+		<a href="/admin" data-role="button" data-inline="true" data-icon="back" data-ajax="false">Admin Panel</a>
 
 	</div>
 </div>
