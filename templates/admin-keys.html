@@ -2,9 +2,10 @@
 
 <!-- Keys content here -->
 <div data-role="page" id="page1">
-	<div data-role="header">
-		<h1><%= content %></h1>
-	</div>
+	
+	<!-- This is a top header. Contains navigation
+		menu button, page heading, etc -->
+	<% include admin-top-bar.html %>
 
 	<div role="main" class="ui-content">
 		<table id="keysTable" data-role="table" data-mode="" class="ui-responsive ui-shadow table-stroke">
