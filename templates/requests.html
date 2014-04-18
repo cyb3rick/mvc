@@ -1,26 +1,43 @@
 <% include header.html %>
 
-<!-- Requests content here -->
-<div data-role="page" id="page1">
+<!-- Content wrapper -->
+<div data-role="page">
+	
+	<!-- Heading -->
 	<div data-role="header">
 		<h1><%= content %></h1>
 	</div>
 
+	<!-- Content -->
 	<div role="main" class="ui-content">
-		<!-- Admin content here -->		
+		
+		<p><%= info %></p>
+		
+		<!-- Error messages from data validation -->
+		<div id="error-message-wrapper" class="ui-bar ui-bar-b ui-corner-all hidden" style="display:none"></div>
+		
+		<form id="requestForm" method="post" action="/request/create" data-ajax="false">
 
-		<p>
-			<%= info %>
-		</p>
-
-		<form method="post" action="/request/create" data-ajax="false">
-
-			<input id="requestFullnameIn" type="text" name="fullname" placeholder="John Smith" />
-			<input id="requestEmailIn" type="text" name="email" placeholder="jsmith@company.com" />
-			<textarea id="requestMessageIn" name="message">I am from Civil Engineering and I am making a study on transportation systems. This information would help in such a study.</textarea>
+			<input id="requestFullnameIn" type="text" name="fullname" placeholder="John Smith" data-validation="required" />
+			<input id="requestEmailIn" type="text" name="email" placeholder="jsmith@company.com" data-validation="email" />
+			<textarea id="requestMessageIn" name="message" data-validation="required"></textarea>
 			<input type="submit" value="Send Request" />
 
 		</form>
+		
+		<!-- Enables form validation. Needs to be placed
+			 _after_ form has been loaded in DOM -->
+		<script>			
+			var errors = $('#error-message-wrapper');
+			$.validate({
+				validateOnBlur: false,
+				errorMessagePosition: errors,
+				onError: function() {
+					errors.css('display', 'block');					
+				}				
+			});
+		</script>
+		
 	</div>
 </div>
 
