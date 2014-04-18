@@ -28,7 +28,8 @@
     "express": "*",
     "ejs": "*",
     "mongodb": "*",
- 	"moment": "*"  
+ 	"moment": "*",
+ 	"nodemailer": "*"
   },
   "devDependencies": {
   	"jasmine-node": "*"    
