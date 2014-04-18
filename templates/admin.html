@@ -3,9 +3,11 @@
 <!-- Admin content here -->
 <div data-role="page" id="page1">
 	
+	<!-- This is a top header. Contains navigation
+		menu button, page heading, etc -->
 	<div data-role="header">
 		<a href="#defaultpanel" data-role="button" data-inline="true" data-icon="bars">Navigation</a>
-		<h1><%= content %></h1>
+		<h1><%= content %></h1>		
 	</div>
 	
 	<div role="main" class="ui-content">
@@ -45,29 +47,13 @@
 	<!-- defaultpanel  -->
 	<div data-role="panel" id="defaultpanel" data-theme="b" data-display="overlay">
 		<div class="panel-content">
+
 			<h2>Admin Panel</h2>
 
-			<!--
-			<div data-role="collapsibleset" data-content-theme="a" data-iconpos="right" id="set">
-			<div data-role="collapsible" id="set1" data-collapsed="true">
-			<h3>Section 1</h3>
-			<p>I'm the collapsible content.</p>
-			</div>
-			<div data-role="collapsible" id="set1" data-collapsed="true">
-			<h3>Section 1</h3>
-			<p>I'm the collapsible content.</p>
-			</div>
-			</div>
-			-->
-
-			<a href="/admin/announcements" data-role="button" data-theme="b" data-icon="comment" data-inline="false">Announcements</a>
-
-			<a href="/admin/keys" data-role="button" data-theme="b" data-icon="tag" data-inline="false">API Keys</a>
-
-			<p>
-				To close, click off the panel, swipe left or right, hit the Esc key, or use the button below:
-			</p>
-
+			<a href="/admin/announcements" data-role="button" data-theme="b" data-icon="comment" data-inline="false">Announcements</a>			
+			<a href="/admin/keys" data-role="button" data-theme="b" data-icon="tag" data-inline="false">API Keys</a>					
+				
+			<a href="/admin/logout" data-ajax="false" data-role="button" data-theme="b" data-icon="action" data-inline="false">Logout</a>
 			<a href="#demo-links" data-rel="close" data-role="button" data-theme="a" data-icon="delete" data-inline="true">Close panel</a>
 
 		</div><!-- /content wrapper for padding -->

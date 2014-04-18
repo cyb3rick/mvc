@@ -179,6 +179,17 @@ module.exports = BaseController.extend({
 		
 	},
 	//*************************************************************************
+    // logout - Destroys current session if it exists.
+    //*************************************************************************
+	logout: function(req, res, next) {
+		
+		this.authorize(req, res, function() {
+			req.session.destroy();
+			res.redirect('/admin');
+		});
+		
+	},
+	//*************************************************************************
     // authorize - A middleware that verifies if the user is logged in. If the
     //			   user isn't logged in, it returns the login view. Otherwise,
     //			   the callback (next) is executed.

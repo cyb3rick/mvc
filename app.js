@@ -63,6 +63,10 @@ MongoClient.connect(mongoURL, function(err, db) {
 		app.all('/admin', attachDB, function(req, res, next){			
 			AdminCtrl.run(req, res, next);	
 		});
+		app.get('/admin/logout', function(req, res, next){			
+			AdminCtrl.logout(req, res, next);
+		});
+		
 		//Admin announcements
 		app.all('/admin/announcements', attachDB, function(req, res, next) {			
 			AdminCtrl.listAnnouncements(req, res, next);
