@@ -54,14 +54,14 @@ module.exports = BaseController.extend({
 		keyModel.createKey(keyRequest, function(err) {
 			
 			if (!err) {								
-				// Complete parameters of the email				
+				// Complete parameters of the email to be sent				
 				mailOptions['to'] = keyRequest.email;
 				mailOptions['subject'] = 'API Key - Waiting for Approval';
     			mailOptions['text'] = 'Thank you. Your API key request is ' +
     							'waiting approval from our Administrators.' + 
     							' You will be notified when a decision is ' +
     							'finally made.';												
-				// Send email
+				// Finally, send email
 				smtpTransport.sendMail(mailOptions, function(err, res) {					
         			if (err) {
 	            		console.log("Error sending message.");

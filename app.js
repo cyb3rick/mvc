@@ -17,7 +17,10 @@ app.engine('.html', require('ejs').__express);
 app.set('views', __dirname + '/templates');
 
 //Static assets
-app.use(express.static(__dirname + '/public'));		
+app.use(express.static(__dirname + '/public'));
+
+// Set favicon
+app.use(express.favicon(__dirname + '/public/imgs/favicon.ico'));
 
 //Without this, we'd need to provide the
 //extension to res.render('foo.html', {data:'data'})
