@@ -1,12 +1,16 @@
 <% include header.html %>
 
 <!-- Admin content here -->
-<div data-role="page" id="page1">
+<div data-role="page">
 	
 	<!-- This is a top header. Contains navigation
-		menu button, page heading, etc -->
+		menu button, page heading, etc -->		
 	<% include admin-top-bar.html %>
 	
+	<!-- Note: The button that opens the admin
+		pannel is located in the top bar -->
+	<% include admin-panel.html %>
+		
 	<div role="main" class="ui-content">
 
 		<h1>Lastest Events</h1>
@@ -39,23 +43,9 @@
 
 			</tbody>
 		</table>
-	</div>
-
-	<!-- defaultpanel  -->
-	<div data-role="panel" id="defaultpanel" data-theme="b" data-display="overlay">
-		<div class="panel-content">
-
-			<h2>Admin Panel</h2>
-
-			<a href="/admin/announcements" data-role="button" data-theme="b" data-icon="comment" data-inline="false">Announcements</a>			
-			<a href="/admin/keys" data-role="button" data-theme="b" data-icon="tag" data-inline="false">API Keys</a>					
-				
-			<a href="/admin/logout" data-ajax="false" data-role="button" data-theme="b" data-icon="action" data-inline="false">Logout</a>
-			<a href="#demo-links" data-rel="close" data-role="button" data-theme="a" data-icon="delete" data-inline="true">Close panel</a>
-
-		</div><!-- /content wrapper for padding -->
-
-	</div><!-- /defaultpanel -->
+	</div> 
+	<!-- /main -->
+	
 </div>
 
 <% include footer.html %>
