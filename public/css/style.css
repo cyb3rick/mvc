@@ -83,6 +83,11 @@ form textarea {
     padding:0;
 }
 
+.pop-like-width {	
+	width: 350px;
+	margin: 0 auto;
+}
+
 /*
 #admin-buttons a {
 	padding: 10px;
