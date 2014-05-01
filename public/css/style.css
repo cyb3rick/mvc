@@ -54,12 +54,14 @@ form textarea {
 #eta-bar{
 	top: 50px;
 	width: 100%;
-	height: 6px;
-	background-color: #FF0000;
-	background: -webkit-linear-gradient(#6C0000, red);
+	height: 6px;	
+	color: #fff;
+	
+	background-color: #409e8c;	
+	/*background: -webkit-linear-gradient(#6C0000, red);
 	background: -o-linear-gradient(#6C0000, red); 
 	background: -moz-linear-gradient(#6C0000, red);
-	background: linear-gradient(#6C0000, red);
+	background: linear-gradient(#6C0000, red);*/
 }
 
 #menu-header{
@@ -75,10 +77,15 @@ form textarea {
 }
 
 .pop{
-	/*width: 350px;*/
+	width: 350px;
     height:auto;
     margin:0;
     padding:0;
+}
+
+.pop-like-width {	
+	width: 350px;
+	margin: 0 auto;
 }
 
 /*

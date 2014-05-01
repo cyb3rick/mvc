@@ -15,8 +15,8 @@ var View = require('../views/Base');
 
 var moment = require('moment');
 
-//Models
-//Remember, require('path/to/model') returns a constructor
+// Models
+// Remember require('/path/to/model') returns constructor
 var keyModel = new (require('../models/Key'));
 var announModel = new (require('../models/Announcement'));
 
@@ -146,6 +146,10 @@ module.exports = BaseController.extend({
 		});
 		
 	},
+	//*************************************************************************
+    // enableKey - Self-explanatory. This handler should be followed by a call
+    //			   to listKeys or URL redirection to somewhere else.
+    //*************************************************************************
 	enableKey: function(req, res, next) {
 		
 		this.authorize(req, res, function() {
@@ -160,7 +164,7 @@ module.exports = BaseController.extend({
 	},
 	//*************************************************************************
     // disableKey - Self-explanatory. This handler should be followed by a call
-    //				to listKeys
+    //				to listKeys or URL redirection to somewhere else.
     //*************************************************************************
 	disableKey: function(req, res, next) {
 		
@@ -171,6 +175,17 @@ module.exports = BaseController.extend({
 				}
 				res.redirect('/admin/keys');
 			});			
+		});
+		
+	},
+	//*************************************************************************
+    // logout - Destroys current session if it exists.
+    //*************************************************************************
+	logout: function(req, res, next) {
+		
+		this.authorize(req, res, function() {
+			req.session.destroy();
+			res.redirect('/admin');
 		});
 		
 	},

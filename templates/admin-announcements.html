@@ -1,11 +1,16 @@
 <% include header.html %>
 
 <!-- Announcements content here -->
-<div data-role="page" id="page1">
-	<div data-role="header">
-		<h1><%= content %></h1>
-	</div>
-
+<div data-role="page">
+	
+	<!-- This is a top header. Contains navigation
+		menu button, page heading, etc -->		
+	<% include admin-top-bar.html %>
+	
+	<!-- Note: The button that opens the admin
+		pannel is located in the top bar -->
+	<% include admin-panel.html %>
+	
 	<div role="main" class="ui-content">
 
 		<!-- Accordion for create announcement form -->
@@ -58,7 +63,7 @@
 			</tbody>
 		</table><!-- /table -->
 		
-		<a href="/admin" data-ajax="false" data-role="button" data-inline="true" data-icon="back">Admin Panel</a>
+		<a href="/admin" data-ajax="false" data-role="button" data-inline="true" data-icon="back">Dashboard</a>
 		
 	</div>
 </div>

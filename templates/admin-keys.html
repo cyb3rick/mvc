@@ -1,10 +1,15 @@
 <% include header.html %>
 
 <!-- Keys content here -->
-<div data-role="page" id="page1">
-	<div data-role="header">
-		<h1><%= content %></h1>
-	</div>
+<div data-role="page">
+	
+	<!-- This is a top header. Contains navigation
+		menu button, page heading, etc -->		
+	<% include admin-top-bar.html %>
+	
+	<!-- Note: The button that opens the admin
+		pannel is located in the top bar -->
+	<% include admin-panel.html %>
 
 	<div role="main" class="ui-content">
 		<table id="keysTable" data-role="table" data-mode="" class="ui-responsive ui-shadow table-stroke">
@@ -32,7 +37,7 @@
 			</tbody>
 		</table>
 
-		<a href="/admin" data-role="button" data-inline="true" data-icon="back" data-ajax="false">Admin Panel</a>
+		<a href="/admin" data-role="button" data-inline="true" data-icon="back" data-ajax="false">Dashboard</a>
 
 	</div>
 </div>
