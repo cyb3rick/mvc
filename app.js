@@ -127,10 +127,6 @@ MongoClient.connect(mongoURL, function(err, db) {
 			RestApiCtrl.run(req, res, next);
 		});
 
-		app.get('/sim', attachDB, function(req, res, next) {
-			res.render('simulator.html');
-		});
-
 		//Start listening for HTTP requests
 		//http.createServer(app).listen(config.port, function() {
 		//	console.log("Listening on port " + config.port);
@@ -150,19 +146,19 @@ MongoClient.connect(mongoURL, function(err, db) {
 
 		//When someone connects through socket.io
 		io.listen(app.listen(config.port)).on('connection', function(socket) {
-
-			socket.on('upd', function(update) {				
-				//Stringify the object
-				var updateStr = JSON.stringify(update) + "\n";
-				//Emit map update TODO: do NOT broadcast, emit to room only
-				socket.broadcast.emit('mapUpdate', updateStr);				
-			});
-
 			//Debug
 			console.log("New client connected.");
+			
+			
+			socket.on('update', function(data) {
+				//socket.broadcast.emit('mapUpdate', 'hello');
+				socket.emit('mapUpdate', 'hello');
+			});
+						
 
 			// Subscribe to update events
 			eventEmitter.on('update', function(data) {
+				
 				var dataStr = data.toString();
 
 				var updateObj = {
@@ -173,15 +169,18 @@ MongoClient.connect(mongoURL, function(err, db) {
 					date : new Date()
 				};
 
+				var myStr = JSON.stringify(updateObj);
+				console.log(myStr);
+				
+				// Send update
+				socket.emit('mapUpdate', myStr);
+	
 				// TODO: Store in database
 				updCol.insert(updateObj, function() {
 					console.log("Saved!");
 				});
 
-				// Broadcast to connected clients
-				socket.broadcast.emit('mapUpdate', JSON.stringify(updateObj));
 			});
-
 		});
 
 	} else {

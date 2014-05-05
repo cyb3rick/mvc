@@ -19,6 +19,11 @@ function initialize() {
 
 google.maps.event.addDomListener(window, "load", initialize);
 
+
+function degToDec(deg) {
+	
+};
+
 /**
  * A function used to create a representation of a trolley.
  * 
@@ -34,6 +39,17 @@ google.maps.event.addDomListener(window, "load", initialize);
  */
 function Trolley(id,lat,lng,date){
 	this.id = id;
+	
+	var latt = new String(parseFloat(lat));
+	var lngg = new String(parseFloat(lng));	
+	latt = parseFloat(latt.substring(0,2))+(parseFloat(latt.substring(2,4))/60)+(parseFloat(latt.substring(5))/36000);
+	lngg = -1*(parseFloat(lngg.substring(0,2))+(parseFloat(lngg.substring(2,4))/60)+(parseFloat(lngg.substring(5))/36000));
+			
+	this.latlng = new google.maps.LatLng(latt,lngg);
+	// debug
+	map.setCenter(this.latlng);
+	console.log(this.latlng.lat() + " " + this.latlng.lng());
+	
 	this.latlng = new google.maps.LatLng(lat,lng);
 	this.date = date;
 	this.stopsTraversed = [];
@@ -50,37 +66,42 @@ function Trolley(id,lat,lng,date){
  * 
  * upd - a JSON object containing information obtained from the tracking unit inside the trolleys.
  */
-function processUpdate(upd){
-	var tindex = -1;
-	var closestStop;
-	var t;
+function processUpdate(upd) {
 	
+	var tindex = -1;		
 	for(var trolley in trolley_array) {
 	    if(trolley_array[trolley].id == upd.id){
 	    	tindex = trolley;
-	    }
+	    } 
 	}
-
-	if(tindex >= 0){
-		t = trolley_array[tindex];
-		t.latlng = new google.maps.LatLng(upd.lat,upd.lng);
-		t.date = upd.date;
-		closestStop = getClosestStop(t.latlng);
 		
-		if((closestStop.dist < 30) && (closestStop.index != t.stopsTraversed[0])){
+	if (tindex >= 0) {
+		
+		var t = trolley_array[tindex];	
+		
+		// Process coordinates
+		var latt = new String(parseFloat(upd.lat));
+		var lngg = new String(parseFloat(upd.lng));
+		latt = parseFloat(latt.substring(0,2))+(parseFloat(latt.substring(2,4))/60)+(parseFloat(latt.substring(5))/36000);
+		lngg = -1*(parseFloat(lngg.substring(0,2))+(parseFloat(lngg.substring(2,4))/60)+(parseFloat(lngg.substring(5))/36000));
+		t.latlng = new google.maps.LatLng(latt,lngg);			
+		t.date = upd.date;
+		
+		var closestStop = getClosestStop(t.latlng); 				
+		if ((closestStop.dist < 30) && (closestStop.index != t.stopsTraversed[0])) {
 			t.stopsTraversed.unshift(closestStop.index);	
-			while(t.stopsTraversed.length > 10){
+			while (t.stopsTraversed.length > 10){
 				t.stopsTraversed.pop();
 			}
 		}
 		
-		t.velocities.unshift(upd.speed);	
+		t.velocities.unshift(upd.speed*0.44704);	
 		while(t.velocities.length > 36){
 			t.velocities.pop();
 		}
 		
-		t.route = getRoute(stopsTraversed).index;
-		t.dir = getDirection(stopsTraversed,routeIndex);
+		t.route = getRoute(t.stopsTraversed).index;
+		t.dir = getDirection(t.stopsTraversed,t.routeIndex);
 		
 		var sum = t.velocities.reduce(function(a, b) { return a + b; });
 		var avg = sum / t.velocities.length;
@@ -89,27 +110,34 @@ function processUpdate(upd){
 		t.marker.setPosition(t.latlng);
 		t.marker.setVisible(google.maps.geometry.poly.containsLocation(t.latlng,Campus) && !(t.avgVelocity < 1));
 	}
-	else{
-		t = new Trolley(upd.id,upd.lat,upd.lng,upd.time);
-		t.velocities.unshift(upd.speed);
-		t.avgVelocity = upd.speed;
+	else {
+		var t = new Trolley(upd.id,upd.lat,upd.lng,upd.time);
+		t.velocities.unshift(upd.speed*0.44704);
+		t.avgVelocity = upd.speed*0.44704;
 		
+		var closestStop = getClosestStop(t.latlng);		
 		if(closestStop.dist < 30){
 			t.stopsTraversed.unshift(t.latlng);
 		}
-		
-		//t.route = getRoute(stopsTraversed);
-		//direction cannot be determined
-		
+
 		t.marker = new google.maps.Marker({
 			position: t.latlng,
             map: map,
             title: t.id
 		});
 		
-		t.marker.setVisible(google.maps.geometry.poly.containsLocation(t.latlng,Campus) && !(t.avgVelocity<1));
+		var isContainedInCampus = google.maps.geometry.poly.containsLocation(t.latlng,Campus);
+		var avgVelNearZero = t.avgVelocity < 1;		
+		
+		// debug
+		console.log("Is Contained: " + isContainedInCampus);	
+		console.log("Has avg vel below 1 " + avgVelNearZero);
+					
+		t.marker.setVisible(isContainedInCampus && avgVelNearZero);
 		trolley_array.push(t);
 	}
+	
+	
 }
 
 function getEta(stop_index,route_index,tlatlng,tdir,avgVelocity){

@@ -20,14 +20,27 @@
 
 		<script>
 			window.onload = function() {
+
+				console.log("test");
+
 				//Connect to socket.io and store connection
-				socket = io.connect(window.location.origin);
+				socket = io.connect(window.location.origin);				
+				
 				//Subscribe to mapUpdates events through socket.io
 				if (socket !== undefined) {
-					socket.on('mapUpdate', function(update) {												
-						var upd = JSON.parse(update);				
-						console.log(upd);
-						processUpdate(upd);
+					
+					console.log("Socket undefined");
+					
+					socket.on('mapUpdate', function(update) {						
+						
+						var myUpdate = JSON.parse(update);
+						console.log(myUpdate);
+						
+						processUpdate(myUpdate);
+						
+						//var upd = JSON.parse(update);
+						// /console.log(upd);
+						//processUpdate(upd);
 					});
 				}
 			};
