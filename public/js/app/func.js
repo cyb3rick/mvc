@@ -20,6 +20,101 @@ function initialize() {
 google.maps.event.addDomListener(window, "load", initialize);
 
 /**
+ * A function used to create a representation of a trolley.
+ * 
+ * id - trolley identifier (string)
+ * lat - the trolley's geographical latitude
+ * lng - the trolley's geographical longitude
+ * time - time at which the last update was received
+ * velocity - the trolley's instant velocity
+ * velocities - an array with the past x velocities
+ * route - the index of the route with highest hit percentage
+ * dir - the direction of the trolley within the route
+ * stopArray - and array containing the past stops traveres by the trolley
+ */
+function Trolley(id,lat,lng,time){
+	this.id = id;
+	this.latlng = new google.maps.LatLng(lat,lng);
+	this.time = time;
+	this.stopsTraversed = [];
+	this.route = undefined;
+	this.dir = undefined;
+	this.velocities = [];
+	this.avgVelocity;
+	this.marker = new google.maps.Marker();
+};
+
+/**
+ * Processes updates. Checks trolley array for existing trolley. If it is found, trolley information is updated.
+ * If it was not found, a new trolley is created with the info provided in the update, and it is added to the array.
+ * 
+ * upd - a JSON object containing information regarding
+ */
+function processUpdate(upd){
+	var tindex = -1;
+	var closestStop;
+	var t;
+	
+	for(var trolley in trolley_array) {
+	    if(trolley_array[trolley].id == upd.id){
+	    	tindex = trolley;
+	    }
+	}
+
+	if(tindex >= 0){
+			t = trolley_array[tindex];
+			t.latlng = new google.maps.LatLng(upd.lat,upd.lng);
+			t.time = upd.time;
+			
+			closestStop = getClosestStop(t.latlng);
+			
+			if((closestStop.dist < 30) && (closestStop.index != t.stopsTraversed[0])){
+				t.stopsTraversed.unshift(closestStop.index);	
+				while(t.stopsTraversed.length > 10){
+					t.stopsTraversed.pop();
+				}
+			}
+			
+			t.velocities.unshift(upd.velocity);	
+			while(t.velocities.length > 36){
+				t.velocities.pop();
+			}
+			
+			var sum = t.velocities.reduce(function(a, b) { return a + b });
+			var avg = sum / t.velocities.length;
+			
+			t.avgVelocity = avg;
+			
+			t.avgVelocity = updateAvgVelocity(t.velocities);
+			//t.stopsTraversed = ;
+			t.route = getRoute(stopsTraversed).index;
+			//link to route
+			
+			t.dir = getDirection(stopsTraversed,routeIndex);
+			
+			//show marker if within x meters of route
+	}
+	else{
+		t = new Trolley(upd.id,upd.lat,upd.lng,upd.time);
+		
+		t.velocities.unshift(upd.velocity);
+		t.avgVelocity = upd.velocity;
+		t.stopsTraversed.unshift();
+		//check if current location is within x meters of route
+		
+		t.route = getRoute();
+		t.marker = new google.maps.Marker();
+		
+		trolley_array.push(t);
+	}
+}
+
+function getEta(stop_index,route_index,tlatlng,tdir,avgVelocity){
+	var distance = getDistanceAcrossPath(stop_array[stop_index].value.getPosition(),tlatlng,route_array[route_index].value.getPath(),route_array[route].type,tdir).len;
+	return distance/avgVelocity;
+}
+
+/**
  *	Description:
  * 	Calculates the distance (in meters) from a particular trolley to the specified stop along a route.
  * 	
@@ -32,29 +127,94 @@ google.maps.event.addDomListener(window, "load", initialize);
  * 	Returns:
  * 	The length of the segment of the route between trolley and stop locations.
  */
-function getDistanceAcrossPath(slatlng,tlatlng,rpath,tdir){
+function getDistanceAcrossPath(slatlng,tlatlng,rpath,rtype,tdir){
 	var stop = closestPointOnPath(rpath,slatlng);
-	var trolley = closestPointOnPath(rpath,tlatlng,tdir);
+	var trolley = closestPointOnPath(rpath,tlatlng);
+	var length = 0;
+	var found = false;
 	
-	if(trolley.dist > 20){	
+	if(trolley.dist > 40){
 		console.log("The trolley is too far away from the path, cannot continue.");
 		return;
 	}
 
 	var coords = [];
-	var times = 0;
-
-	if(tdir){
-		for(var i=trolley.index; i != stop.index && times <= rpath.length; i = ((((i + 1) % rpath.length)+rpath.length)%rpath.length), times++){
-			coords.push(rpath.getAt(i));
+	
+	if(rtype == "linear"){
+		if(tdir == 1){
+			for(var i=trolley.index; i < rpath.length; i++){
+				coords.push(rpath.getAt(i));
+				if(i == stop.index){
+					found = true;
+					break;
+				}
+			}
+			
+			if(!found){
+				length = google.maps.geometry.spherical.computeLength(coords)*2;
+				coords.length = 0;
+				
+				for(var i=trolley.index; i >= 0; i--){
+					coords.push(rpath.getAt(i));
+					if(i == stop.index){
+						found = true;
+						break;
+					}
+				}
+			}
 		}
-	} else {
-		for(var i=trolley.index; i != stop.index && times <= rpath.length; i = ((((i - 1) % rpath.length)+rpath.length)%rpath.length), times++){
-			coords.push(rpath.getAt(i));
+		else if(tdir == -1){
+			for(var i=trolley.index; i >= 0; i--){
+				coords.push(rpath.getAt(i));
+				if(i == stop.index){
+					found = true;
+					break;
+				}
+			}
+			
+			if(!found){
+				length = google.maps.geometry.spherical.computeLength(coords)*2;
+				coords.length = 0;
+			
+				for(var i=trolley.index; i < rpath.length; i++){
+					coords.push(rpath.getAt(i));
+					if(i == stop.index){
+						found = true;
+						break;
+					}
+				}	
+			}		
 		}
 	}
+	
+	else if(rtype == "circular"){
+		var j=0;
+		
+		if(tdir == 1){
+			for(var i=trolley.index; j < rpath.length; i = (i+1)%rpath.length,j++){
+				coords.push(rpath.getAt(i));
+				if(i == stop.index){
+					found = true;
+					break;
+				}
+			}
+		}
+		else if(tdir == -1){
+			for(var i=trolley.index; j < rpath.length; i = (((i-1)%rpath.length)+rpath.length)%rpath.length,j++){
+				coords.push(rpath.getAt(i));
+				if(i == stop.index){
+					found = true;
+					break;
+				}
+			}
+		}
+	}
+	
+	else if("weird"){
+		
+	}
 
-	var length = google.maps.geometry.spherical.computeLength(coords);
+	length += google.maps.geometry.spherical.computeLength(coords);
 	
 	return {"len":length};
 }
@@ -105,49 +265,22 @@ function getClosestStop(latlng){
  *	If two latlngs are passed as parameters, in addition to respective indexes, distances and coordinates, the function 
  * 	calculates the direction the trolley is moving with respect to the path.
  */
-function closestPointOnPath(path,latlng,latlng2){
-	if (arguments.length == 2) {
-		var coord = (new google.maps.Polyline({ path: path})).getPath().getAt(0);
-		var theindex;
-		var temp;
-	
-		for(var index = 0; index < path.length; index++){
-			temp = google.maps.geometry.spherical.computeDistanceBetween(latlng,path.getAt(index));
-			if(temp < google.maps.geometry.spherical.computeDistanceBetween(latlng,coord)){
-				coord = path.getAt(index);
-				theindex = index;
-			}
+function closestPointOnPath(path,latlng){
+	var coord = (new google.maps.Polyline({ path: path})).getPath().getAt(0);
+	var theindex;
+	var this_dist;
+	var min_dist;
+
+	for(var index = 0; index < path.length; index++){
+		this_dist = google.maps.geometry.spherical.computeDistanceBetween(latlng,path.getAt(index));
+		if(this_dist < min_dist || index == 0){
+			coord = path.getAt(index);
+			min_dist = this_dist;
+			theindex = index;
 		}
-		var dist = google.maps.geometry.spherical.computeDistanceBetween(latlng,coord);
-		return {"coord":coord,"dist":dist,"index":theindex};
-	
-	} else if (arguments.length == 3){
-		var coord1 = path[0];
-		var coord2 = path[0];
-		var theindex1;
-		var theindex2;
-		var temp;
-		var dir;
-	
-		for(index = 1; index < path.length; index++){
-			temp = google.maps.geometry.spherical.computeDistanceBetween(latlng,path[index]);
-			if(temp < google.maps.geometry.spherical.computeDistanceBetween(latlng,coord1)){
-				coord1 = path[index];
-				theindex1 = index;
-			}
-			
-			temp = google.maps.geometry.spherical.computeDistanceBetween(latlng2,path[index]);
-			
-			if(temp < google.maps.geometry.spherical.computeDistanceBetween(latlng2,coord2)){
-				coord2 = path[index];
-				theindex2 = index;
-			}
-		}
-		var dist1 = google.maps.geometry.spherical.computeDistanceBetween(latlng,coord1);
-		var dist2 = google.maps.geometry.spherical.computeDistanceBetween(latlng,coord2);
-		dir = (theindex1 > theindex2 ? 1 : (theindex1 == theindex2 ? 0 : -1));
-		return {"curr_coord":coord1,"prev_coord":coord2,"curr_dist":dist1,"prev_dist":dist2,"curr_index":theindex1,"prev_index":theindex2,"dir":dir};
 	}
+
+	return {"coord":coord,"dist":min_dist,"index":theindex};
 }
 
 /**
@@ -185,9 +318,7 @@ function animateMarker(tid,tmarker,tmarker_path,rpoly,slatlng,dir) {
 		setInterval(function() {
 			tlatlng = tmarker_path[index % tmarker_path.length];
 			index++;
-			//tmarker.setVisible(google.maps.geometry.poly.isLocationOnEdge(tlatlng, rpoly, 0.0005));
 			tmarker.setPosition(tlatlng);
-			//var dist = getDistanceAcrossPath(slatlng,tlatlng,rpoly.getPath(),dir);
 			var dist = 20;
 			thisEta = Math.round(getETA(dist.len,45));
 			if(lastEta != thisEta){
@@ -196,7 +327,6 @@ function animateMarker(tid,tmarker,tmarker_path,rpoly,slatlng,dir) {
 			
 			ret = getClosestStop(tlatlng);
 			if((ret.dist < 30) && (ret.stop.key != lastStop)){
-				
 				traversed.unshift(ret.stop.key);
 				indexes.unshift(ret.index);
 				lastStop = ret.stop.key;
@@ -204,18 +334,24 @@ function animateMarker(tid,tmarker,tmarker_path,rpoly,slatlng,dir) {
 					traversed.pop();
 					indexes.pop();
 				}
-				//console.log(JSON.stringify(traversed));
-				//console.log(JSON.stringify(indexes));
+
 				console.log("Trolley with ID '"+tid+"' passing by the '"+traversed[0]+"' stop");
-				console.log("Current direction: "+getDirection(indexes,getRoute(indexes)));
+				var the_route = getRoute(indexes);
+				console.log("Current direction: "+getDirection(indexes,the_route));
+				stop = stop_array[14];
+				sname = stop.value.getTitle();
+				slatlng = stop.value.getPosition();
+				console.log("Distance to stop: "+sname+" is "+getDistanceAcrossPath(slatlng,tlatlng,(new google.maps.Polyline({path: Interno})).getPath(),route_array[the_route.index].type,getDirection(indexes,the_route)).len);
 				console.log("--------------------------------------------");
-				
 			}
 
 			lastEta = Math.round(getETA(dist.len,45));
 		}, 100);
 	}
 }
+
+
+
 /**
  *	Description:
  *  Calculates an estimate of time before the next bus arrives
@@ -431,10 +567,10 @@ function initRoutes(){
 	//stop order is counter-clockwise in all routes for consistency
 	route_array = [
 		{	key: "route1", title: "Palacio", 
-			stops: ["pala","barc","port","stef","pati"],
-			//name : ["pala","barc","deca","port","stef","fisi","pati","bibl","gimn","entr"],
-			seq: { name : [0,8,9,7,6,1,3,2,13,11],
-					unique_to_route: [0,8,9,7],
+			type: "linear",
+			stops: ["pala","barc","port","stef","fisi","pati","bibl"],
+			seq: { name : [0,1,2,3,4,5,6,7,8],
+					unique_to_route: [0,1,2,3,4],
 					unreliable: []
 				},
 			value:	new google.maps.Polyline({
@@ -448,11 +584,11 @@ function initRoutes(){
 		},					
 	
 		{	key: "route2", title: "Zoologico",
-			stops: ["zool","biol","civi","bibl","fisi"],
-			//name : ["zool","biol","civi","bibl","pati","fisi","biol"],
-			seq: { name : [19,18,5,2,3,1,18],
-					unique_to_route: [19,18,5],
-					unreliable: [18,19]
+			type: "linear",
+			stops: ["zool","biol","fisi","pati","bibl","agri","civi"],
+			seq: { name : [9,29,10,6,7,8,11,12,13],
+					unique_to_route: [9,10,11,12,13],
+					unreliable: []
 				},
 			value: new google.maps.Polyline({
 				visible : false,
@@ -465,11 +601,11 @@ function initRoutes(){
 		},
 		
 		{	key: "route3", title: "Interno",
-			stops: ["atle","admi","bibl","fisi","cent","pine"],
-			//name : ["bibl","admi","atle","admi","gimn","entr","pine","cent","stef","fisi","pati"],
-			seq: {  name : [2,4,17,4,13,11,16,10,6,1,3],
-					unique_to_route: [17],
-					unreliable : [4,17]
+			type: "circular",
+			stops: ["bibl","pati","fisi","stef","cent","pine","town","gimn"],
+			seq: {  name : [8,7,6,5,14,15,26,16,17,16,26,18],
+					unique_to_route: [16,17],
+					unreliable : [16,17,26]
 				},
 			value:	new google.maps.Polyline({
 				visible : false,
@@ -482,10 +618,10 @@ function initRoutes(){
 		},
 		
 		{	key: "route4", title: "Terrace",
-			stops: ["terr","finc","admi","pati","fisi","cent"],
-			//name : ["terr","entr","pine","cent","stef","fisi","pati","bibl","admi","finc"]
-			seq: {  name : [15,11,16,10,6,1,3,2,4,14],
-					unique_to_route: [15,14],
+			type: "linear",
+			stops: ["terr","finc","cita","edif","admi","bibl","pati","fisi"],
+			seq: {  name : [19,20,21,22,23,8,7,6],
+					unique_to_route: [19,20,21,22,23],
 					unreliable: []
 				},
 			value:	new google.maps.Polyline({
@@ -499,11 +635,11 @@ function initRoutes(){
 		},
 							
 		{	key: "route5", title: "Darlington",
-			stops: ["darl","entr","gimn","bibl"],
-			//name : ["darl","entr","gimn","bibl","gimn","entr"],
-			seq: { name : [12,11,13,2,13,11],
-					unique_to_route: [12],
-					unreliable: []
+			type: "weird",
+			stops: ["voca","darl","entr","gimn","bibl","pati","fisi"],
+			seq: { name : [25,27,26,18,8,7,6,7],
+					unique_to_route: [24,25],
+					unreliable: [25,27]
 				},
 			value:	new google.maps.Polyline({
 				visible : false,
@@ -534,11 +670,15 @@ function getRoute(stopArray){
 	var max = Math.max.apply(Math,scores);
 	var index = scores.indexOf(max);
 
-	console.log("Matching route '"+route_array[index].title+"' with a "+scores[index]*100+" hit percent.");
+	//console.log("Matching route '"+route_array[index].title+"' with a "+scores[index]*100+" hit percent.");
 	
 	return {"index" : index};
 }
 
+/**
+ * Identifies the direction of a trolley within a route, be it clockwise (-1), counter-clockwise (1) or cannot be determined (0).
+ *  
+ */
 function getDirection(stopArray,routeIndex){
 	if(stopArray.length < 2){
 		return 0;
@@ -550,10 +690,10 @@ function getDirection(stopArray,routeIndex){
 	
 	for(var i=0; i < len; i++){
 		if(route_array[routeIndex].seq.name[i] == stopArray[0]){
-			for(var j=1; j < len-2; j++){
+			
+			for(var j=1; j < len-5; j++){
 				var reliable0 = (route_array[routeIndex].seq.unreliable.indexOf(stopArray[j-1]) > -1 ? false : true);
 				var reliable1 = (route_array[routeIndex].seq.unreliable.indexOf(stopArray[j]) > -1 ? false : true);
-				
 				if((reliable0 || reliable1)){
 					if(route_array[routeIndex].seq.name[(((i-j)%len)+len)%len] == stopArray[j]){
 						return 1;
@@ -587,20 +727,50 @@ function initStopMarkers(){
 			})
 		},
 		
+		{	key : "pre-pala", value: new google.maps.Marker({
+				position : new google.maps.LatLng(18.206758, -67.137340),
+				title : "Palacio",
+				icon: busstop,
+				visible: false
+			})
+		},
+		
+		{	key: "barc", value: new google.maps.Marker({
+				position : new google.maps.LatLng(18.207543,-67.139935),
+				title : "Barcelona",
+				icon: busstop
+			})
+		},
+		
+		{	key: "deca", value: new google.maps.Marker({
+				position : new google.maps.LatLng(18.208648,-67.141432),
+				title : "Decanato de Estudiantes",
+				icon: busstop,
+				visible: false
+			})
+		},
+		
+		{	key: "port", value: new google.maps.Marker({
+				position : new google.maps.LatLng(18.208957,-67.140322),
+				title : "Portico",
+				icon: busstop
+			})
+		},
+		
+		{	key: "stef", value: new google.maps.Marker({
+				position : new google.maps.LatLng(18.20968,-67.139021),
+				title : "Stefani",
+				icon: busstop
+			})
+		},
+		
 		{	key: "fisi", value: new google.maps.Marker({
 				position : new google.maps.LatLng(18.210868,-67.139643),
-				title : "Puente Fisica",
+				title : "Fisica",
 				icon: busstop
 			})
 		},
-	
-		{	key: "bibl", value: new google.maps.Marker({
-				position : new google.maps.LatLng(18.211787,-67.14196),
-				title : "Biblioteca",
-				icon: busstop
-			})
-		},
-	
+		
 		{ 	key: "pati", value: new google.maps.Marker({
 				position : new google.maps.LatLng(18.211283,-67.140823),
 				title : "Patio Central",
@@ -608,51 +778,130 @@ function initStopMarkers(){
 			})
 		},
 	
-		{	key: "admi", value: new google.maps.Marker({
-				position : new google.maps.LatLng(18.216771,-67.143049),
-				title : "Administracion de Empresas",
+		{	key: "bibl", value: new google.maps.Marker({
+				position : new google.maps.LatLng(18.211787,-67.14196),
+				title : "Esquina Biblioteca",
 				icon: busstop
 			})
 		},
-	
+		
+		{	key: "zool", value: new google.maps.Marker({
+				position : new google.maps.LatLng(18.216050, -67.133764),
+				title : "Zoologico",
+				icon: busstop
+			})
+		},
+		
+		{	key: "biol", value: new google.maps.Marker({
+				position : new google.maps.LatLng(18.211762,-67.138246),
+				title : "Biologia",
+				icon: busstop
+			})
+		},
+		
+		{	key: "agri", value: new google.maps.Marker({
+				position : new google.maps.LatLng(18.214003, -67.141454),
+				title : "Ingenieria Agricola",
+				icon: busstop
+			})
+		},
+		
+		{	key: "pre-civi", value: new google.maps.Marker({
+				position : new google.maps.LatLng(18.215187, -67.139994),
+				title : "Pre-Ingenieria Civil",
+				icon: busstop,
+				visible: false
+			})
+		},
+		
 		{	key: "civi", value: new google.maps.Marker({
 				position : new google.maps.LatLng(18.21458,-67.139772),
 				title : "Ingenieria Civil",
 				icon: busstop
 			})
 		},
-	
-		{	key: "stef", value: new google.maps.Marker({
-				position : new google.maps.LatLng(18.20968,-67.139021),
-				title : "Stefani",
-				icon: busstop
-			})
-		},
-	
-		{	key: "port", value: new google.maps.Marker({
-				position : new google.maps.LatLng(18.208957,-67.140322),
-				title : "Portico",
-				icon: busstop
-			})
-		},
-	
-		{	key: "barc", value: new google.maps.Marker({
-				position : new google.maps.LatLng(18.207543,-67.139935),
-				title : "Barcelona",
-				icon: busstop
-			})
-		},
-	
-		{	key: "deca", value: new google.maps.Marker({
-				position : new google.maps.LatLng(18.208648,-67.141432),
-				title : "Decanato de Estudiantes",
-				icon: busstop
-			})
-		},
-	
+		
 		{	key: "cent", value: new google.maps.Marker({
 				position : new google.maps.LatLng(18.209935,-67.141472),
 				title : "Centro de Estudiantes",
+				icon: busstop
+			})
+		},
+		
+		{	key: "pine", value: new google.maps.Marker({
+				position : new google.maps.LatLng(18.210638,-67.143591),
+				title : "Pinero",
+				icon: busstop
+			})
+		},
+		
+		{	key: "pre-town", value: new google.maps.Marker({
+				position : new google.maps.LatLng(18.210159, -67.144323),
+				title : "Pre-Town Center",
+				icon: busstop,
+				visible: false
+			})
+		},
+		
+		{	key: "town", value: new google.maps.Marker({
+				position : new google.maps.LatLng(18.209881, -67.144582),
+				title : "Town Center",
+				icon: busstop
+			})
+		},
+		
+		{	key: "gimn", value: new google.maps.Marker({
+				position : new google.maps.LatLng(18.212119,-67.143776),
+				title : "Gimnasio Espada",
+				icon: busstop
+			})
+		},
+		
+		{	key: "terr", value: new google.maps.Marker({
+				position : new google.maps.LatLng(18.215375,-67.14802),
+				title : "Parque Terrace",
+				icon: busstop
+			})
+		},
+		
+		{	key: "finc", value: new google.maps.Marker({
+				position : new google.maps.LatLng(18.215461,-67.146341),
+				title : "Finca Alzamora",
+				icon: busstop
+			})
+		},
+		
+		{	key: "cita", value: new google.maps.Marker({
+				position : new google.maps.LatLng(18.217300, -67.145641),
+				title: "CITAI",
+				icon: busstop
+			})
+		},
+		
+		{	key: "edif", value: new google.maps.Marker({
+				position : new google.maps.LatLng(18.218239, -67.144141),
+				title : "Edificio A",
+				icon: busstop
+			})
+		},
+
+		{	key: "admi", value: new google.maps.Marker({
+				position : new google.maps.LatLng(18.216771,-67.143049),
+				title : "Empresas",
+				icon: busstop
+			})
+		},
+		
+		{	key: "voca", value: new google.maps.Marker({
+				position : new google.maps.LatLng(18.209516, -67.146727),
+				title : "Escuela Vocacional",
+				icon: busstop
+			})
+		},
+		
+		{	key: "darl", value: new google.maps.Marker({
+				position : new google.maps.LatLng(18.205683,-67.146185),
+				title : "Darlington",
 				icon: busstop
 			})
 		},
@@ -663,62 +912,30 @@ function initStopMarkers(){
 				icon: busstop
 			})
 		},
-	
-		{	key: "darl", value: new google.maps.Marker({
-				position : new google.maps.LatLng(18.205683,-67.146185),
-				title : "Darlington",
-				icon: busstop
+		
+		{	key: "carr2", value: new google.maps.Marker({
+				position : new google.maps.LatLng(18.210473, -67.145482),
+				title : "Carr No. 2",
+				icon: busstop,
+				visible: false
 			})
 		},
-	
-		{	key: "gimn", value: new google.maps.Marker({
-				position : new google.maps.LatLng(18.212119,-67.143776),
-				title : "Gimnasio",
-				icon: busstop
+		
+		{	key: "pre-darl", value: new google.maps.Marker({
+				position : new google.maps.LatLng(18.209523, -67.145394),
+				title : "Pre-Darlington",
+				icon: busstop,
+				visible: false
 			})
 		},
-	
-		{	key: "finc", value: new google.maps.Marker({
-				position : new google.maps.LatLng(18.215461,-67.146341),
-				title : "Finca Alzamora",
-				icon: busstop
+		
+		{	key: "pre-zool", value: new google.maps.Marker({
+				position : new google.maps.LatLng(18.215615, -67.134772),
+				title : "Pre-Zoologico",
+				icon: busstop,
+				visible: false
 			})
 		},
-	
-		{	key: "terr", value: new google.maps.Marker({
-				position : new google.maps.LatLng(18.215375,-67.14802),
-				title : "Parque Terrace",
-				icon: busstop
-			})
-		},
-	
-		{	key: "pine", value: new google.maps.Marker({
-				position : new google.maps.LatLng(18.210638,-67.143591),
-				title : "Pinero",
-				icon: busstop
-			})
-		},
-	
-		{	key: "atle", value: new google.maps.Marker({
-				position : new google.maps.LatLng(18.217306,-67.144844),
-				title : "Residencia de Atletas",
-				icon: busstop
-			})
-		},
-	
-		{	key: "biol", value: new google.maps.Marker({
-				position : new google.maps.LatLng(18.211762,-67.138246),
-				title : "Biologia",
-				icon: busstop
-			})
-		},
-	
-		{	key: "zool", value: new google.maps.Marker({
-				position : new google.maps.LatLng(18.215813,-67.133396),
-				title : "Zoologico",
-				icon: busstop
-			})
-		}
 	];
 		
 	$.each(stop_array, function(stop) {
@@ -726,58 +943,69 @@ function initStopMarkers(){
 	});
 }
 
+
+
 /**
  *	Description: 
  * 	Animates a virtual trolley along a route for the purpose of testing several functions.
  */
 function initSimulatorStuff(){
 	var bus = '../css/images/icons-simple/bus.png';
-
-	route3_trolley = new google.maps.Marker({
-		position : interno_trolley[0],
-		title : "interno_trolley",
-		icon: bus,
-		visible : false
-	});
 	
 	route1_trolley = new google.maps.Marker({
-		position : pala_trolley[0],
+		position : Palacio[0],
 		title : "pala_trolley",
 		icon: bus,
 		visible : true
 	});
 	
 	route2_trolley = new google.maps.Marker({
-		position : zool_trolley[0],
+		position : Zoologico[0],
 		title : "zool_trolley",
 		icon: bus,
 		visible : false
 	});
 	
+	route3_trolley = new google.maps.Marker({
+		position : Interno[0],
+		title : "interno_trolley",
+		icon: bus,
+		visible : false
+	});
+	
 	route4_trolley = new google.maps.Marker({
-		position : terr_trolley[0],
+		position : Terrace[0],
 		title : "terr_trolley",
 		icon: bus,
 		visible : false
 	});
 	
-	var interno_poly = new google.maps.Polyline({path : interno_trolley, map: map, visible : false});
-	var pala_poly = new google.maps.Polyline({path : pala_trolley, map: map, visible : false});
-	var terr_poly = new google.maps.Polyline({path : terr_trolley, map: map, visible : false});
-	var zool_poly = new google.maps.Polyline({path : zool_trolley, map: map, visible : false});
+	route5_trolley = new google.maps.Marker({
+		position : Darlington[0],
+		title : "darl_trolley",
+		icon: bus,
+		visible : false
+	});
+	
+	var interno_poly = new google.maps.Polyline({path : Interno, map: map, visible : false});
+	var pala_poly = new google.maps.Polyline({path : Palacio, map: map, visible : false});
+	var terr_poly = new google.maps.Polyline({path : Terrace, map: map, visible : false});
+	var zool_poly = new google.maps.Polyline({path : Zoologico, map: map, visible : false});
+	var darl_poly = new google.maps.Polyline({path : Darlington, map: map, visible : false});
 	
 	route1_trolley.setMap(map);
 	route2_trolley.setMap(map);
 	route3_trolley.setMap(map);
 	route4_trolley.setMap(map);
+	route5_trolley.setMap(map);
 	
-	trolley_array = [route1_trolley,route2_trolley,route3_trolley,route4_trolley];
+	trolley_array = [route1_trolley,route2_trolley,route3_trolley,route4_trolley,route5_trolley];
 	
-	//animateMarker(route3_trolley,interno_trolley,route_array[2].value);
-	animateMarker("T2_Interno",route3_trolley,interno_trolley,interno_poly,stop_array[2].value.getPosition(),1);
-	animateMarker("T1_Zoologico",route2_trolley,zool_trolley,zool_poly,stop_array[1].value.getPosition(),1);
-	animateMarker("T0_Palacio",route1_trolley,pala_trolley,pala_poly,stop_array[0].value.getPosition(),1);
-	animateMarker("T3_Terrace",route4_trolley,terr_trolley,terr_poly,stop_array[3].value.getPosition(),1);
+	//animateMarker("T0_Palacio",route1_trolley,Palacio,pala_poly,stop_array[0].value.getPosition(),1);
+	//animateMarker("T1_Zoologico",route2_trolley,Zoologico,zool_poly,stop_array[1].value.getPosition(),1);
+	animateMarker("T2_Interno",route3_trolley,Interno,interno_poly,stop_array[2].value.getPosition(),1);
+	//animateMarker("T3_Terrace",route4_trolley,Terrace,terr_poly,stop_array[3].value.getPosition(),1);
+	//animateMarker("T4_Darlington",route5_trolley,Darlington,darl_poly,stop_array[4].value.getPosition(),1);
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
