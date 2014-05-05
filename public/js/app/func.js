@@ -41,11 +41,11 @@ function Trolley(id,lat,lng,date){
 	this.id = id;
 	
 	var latt = new String(parseFloat(lat));
-	var lngg = new String(parseFloat(lng));	
+	var lngg = new String(parseFloat(lng));
 	latt = parseFloat(latt.substring(0,2))+(parseFloat(latt.substring(2,4))/60)+(parseFloat(latt.substring(5))/36000);
 	lngg = -1*(parseFloat(lngg.substring(0,2))+(parseFloat(lngg.substring(2,4))/60)+(parseFloat(lngg.substring(5))/36000));
-			
 	this.latlng = new google.maps.LatLng(latt,lngg);
+			
 	// debug
 	map.setCenter(this.latlng);
 	console.log(this.latlng.lat() + " " + this.latlng.lng());
@@ -84,8 +84,10 @@ function processUpdate(upd) {
 		var lngg = new String(parseFloat(upd.lng));
 		latt = parseFloat(latt.substring(0,2))+(parseFloat(latt.substring(2,4))/60)+(parseFloat(latt.substring(5))/36000);
 		lngg = -1*(parseFloat(lngg.substring(0,2))+(parseFloat(lngg.substring(2,4))/60)+(parseFloat(lngg.substring(5))/36000));
-		t.latlng = new google.maps.LatLng(latt,lngg);			
+		t.latlng = new google.maps.LatLng(latt,lngg);		
 		t.date = upd.date;
+		
+		map.setCenter(t.latlng);
 		
 		var closestStop = getClosestStop(t.latlng); 				
 		if ((closestStop.dist < 30) && (closestStop.index != t.stopsTraversed[0])) {
