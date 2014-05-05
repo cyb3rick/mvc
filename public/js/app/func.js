@@ -14,7 +14,7 @@ function initialize() {
 
 	initStopMarkers();
 	initRoutes();
-	initSimulatorStuff();
+	//initSimulatorStuff();
 }
 
 google.maps.event.addDomListener(window, "load", initialize);
@@ -48,7 +48,7 @@ function Trolley(id,lat,lng,time){
  * Processes updates. Checks trolley array for existing trolley. If it is found, trolley information is updated.
  * If it was not found, a new trolley is created with the info provided in the update, and it is added to the array.
  * 
- * upd - a JSON object containing information regarding
+ * upd - a JSON object containing information obtained from the tracking unit inside the trolleys.
  */
 function processUpdate(upd){
 	var tindex = -1;
@@ -62,49 +62,52 @@ function processUpdate(upd){
 	}
 
 	if(tindex >= 0){
-			t = trolley_array[tindex];
-			t.latlng = new google.maps.LatLng(upd.lat,upd.lng);
-			t.time = upd.time;
-			
-			closestStop = getClosestStop(t.latlng);
-			
-			if((closestStop.dist < 30) && (closestStop.index != t.stopsTraversed[0])){
-				t.stopsTraversed.unshift(closestStop.index);	
-				while(t.stopsTraversed.length > 10){
-					t.stopsTraversed.pop();
-				}
+		t = trolley_array[tindex];
+		t.latlng = new google.maps.LatLng(upd.lat,upd.lng);
+		t.time = upd.time;
+		closestStop = getClosestStop(t.latlng);
+		
+		if((closestStop.dist < 30) && (closestStop.index != t.stopsTraversed[0])){
+			t.stopsTraversed.unshift(closestStop.index);	
+			while(t.stopsTraversed.length > 10){
+				t.stopsTraversed.pop();
 			}
-			
-			t.velocities.unshift(upd.velocity);	
-			while(t.velocities.length > 36){
-				t.velocities.pop();
-			}
-			
-			var sum = t.velocities.reduce(function(a, b) { return a + b });
-			var avg = sum / t.velocities.length;
-			
-			t.avgVelocity = avg;
-			
-			t.avgVelocity = updateAvgVelocity(t.velocities);
-			//t.stopsTraversed = ;
-			t.route = getRoute(stopsTraversed).index;
-			//link to route
-			
-			t.dir = getDirection(stopsTraversed,routeIndex);
-			
-			//show marker if within x meters of route
+		}
+		
+		t.velocities.unshift(upd.velocity);	
+		while(t.velocities.length > 36){
+			t.velocities.pop();
+		}
+		
+		t.route = getRoute(stopsTraversed).index;
+		t.dir = getDirection(stopsTraversed,routeIndex);
+		
+		var sum = t.velocities.reduce(function(a, b) { return a + b });
+		var avg = sum / t.velocities.length;
+		t.avgVelocity = avg;
+		
+		t.marker.setPosition(t.latlng);
+		t.marker.setVisible(google.maps.geometry.poly.containsLocation(t.latlng,Campus) && !(t.avgVelocity==0));
 	}
 	else{
 		t = new Trolley(upd.id,upd.lat,upd.lng,upd.time);
-		
 		t.velocities.unshift(upd.velocity);
 		t.avgVelocity = upd.velocity;
-		t.stopsTraversed.unshift();
-		//check if current location is within x meters of route
 		
-		t.route = getRoute();
-		t.marker = new google.maps.Marker();
+		if(closestStop.dist < 30){
+			t.stopsTraversed.unshift(t.latlng);
+		}
 		
+		//t.route = getRoute(stopsTraversed);
+		//direction cannot be determined
+		
+		t.marker = new google.maps.Marker({
+			position: t.latlng,
+            map: map,
+            title: t.id
+		});
+		
+		t.marker.setVisible(google.maps.geometry.poly.containsLocation(t.latlng,Campus) && !(t.avgVelocity==0));
 		trolley_array.push(t);
 	}
 }
@@ -211,7 +214,7 @@ function getDistanceAcrossPath(slatlng,tlatlng,rpath,rtype,tdir){
 	}
 	
 	else if("weird"){
-		
+		return {"len":-1};
 	}
 
 	length += google.maps.geometry.spherical.computeLength(coords);
@@ -246,7 +249,6 @@ function getClosestStop(latlng){
 			closest = {"stop": this_stop, "dist": this_dist, "index" : i};
 		}
 	}
-	
 	return closest;
 }
 
@@ -281,127 +283,6 @@ function closestPointOnPath(path,latlng){
 	}
 
 	return {"coord":coord,"dist":min_dist,"index":theindex};
-}
-
-/**
- *	Description:
- * 	Animates a marker representation of a trolley along a route.
- * 	
- * 	Params:
- *	tmarker - the trolley marker
- * 	tmarker_path - the path the trolley is to follow
- * 	rpoly - route polyline used as reference to check whether trolley coordinates lie on it
- * 	slatlng - the coordinates of a station, used to test other functions such as getDistanceAcrossPath() and getETA()
- * 	dir - the direction of the trolley with respect to route, 1 for CCW, 0 for CW.
- */
-function animateMarker(tid,tmarker,tmarker_path,rpoly,slatlng,dir) {
-	if (arguments.length == 4) {
-		var coords;
-		var index = 0;
-		var lastEta = -1;
-		var thisEta = 0;
-		var lastStop = "";
-		
-		setInterval(function() {
-			coords = tmarker_path[index % tmarker_path.length];
-			index++;
-			//tmarker.setVisible(google.maps.geometry.poly.isLocationOnEdge(coords, rpoly, 0.0005));
-			tmarker.setPosition(coords);
-		}, 100);
-	} else if (arguments.length == 6) {
-		var tlatlng;
-		var index = 0;
-		var res;
-		var ret;
-		var traversed = [];
-		var indexes = [];
-		setInterval(function() {
-			tlatlng = tmarker_path[index % tmarker_path.length];
-			index++;
-			tmarker.setPosition(tlatlng);
-			var dist = 20;
-			thisEta = Math.round(getETA(dist.len,45));
-			if(lastEta != thisEta){
-				//console.log("ETA: "+thisEta+" seconds");
-			}
-			
-			ret = getClosestStop(tlatlng);
-			if((ret.dist < 30) && (ret.stop.key != lastStop)){
-				traversed.unshift(ret.stop.key);
-				indexes.unshift(ret.index);
-				lastStop = ret.stop.key;
-				if(traversed.length > 10){
-					traversed.pop();
-					indexes.pop();
-				}
-
-				console.log("Trolley with ID '"+tid+"' passing by the '"+traversed[0]+"' stop");
-				var the_route = getRoute(indexes);
-				console.log("Current direction: "+getDirection(indexes,the_route));
-				stop = stop_array[14];
-				sname = stop.value.getTitle();
-				slatlng = stop.value.getPosition();
-				console.log("Distance to stop: "+sname+" is "+getDistanceAcrossPath(slatlng,tlatlng,(new google.maps.Polyline({path: Interno})).getPath(),route_array[the_route.index].type,getDirection(indexes,the_route)).len);
-				console.log("--------------------------------------------");
-			}
-
-			lastEta = Math.round(getETA(dist.len,45));
-		}, 100);
-	}
-}
-
-
-
-/**
- *	Description:
- *  Calculates an estimate of time before the next bus arrives
- * 
- * 	Params:
- * 	distance - the distance in meters that corresponds to the length of a segment of a route between trolley and stop
- * 	velocity - average velocity of the trolley
- */
-function getETA(distance,velocity){
-	return distance/velocity;
-}
-
-/**
- *	Description:
- * 	Animates a marker representation of a trolley according to the updates received. Creates a new marker if the 
- * 	  trolley was not found in the array.
- * 	
- * 	Params:
- *	tarray - the array containing all active trolleys
- * 	upd - an object containing trolleyid, coordinates and timestamp. 	
- */
-function applyUpdate(tarray,upd) {
-	var date = new Date(upd.date*1000);
-	var hours = date.getHours();
-	var minutes = date.getMinutes();
-	var seconds = date.getSeconds();
-	
-	var tname = upd.name;
-	var tlatlng = new google.maps.LatLng(upd.lat,upd.lng);
-	var formattedTime = hours + ':' + minutes + ':' + seconds;
-	
-	console.log("Trolley: "+tname+", Coords: "+tlatlng+", Date: "+formattedTime);
-	
-	for (var i = 0; i < tarray.length; i++) {
-	    if (tarray[i].name == tname){
-	    	tarray[i].marker.setPosition(tlatlng);
-	    	return;
-	    }
-	}
-	
-	//trolley was not found, create trolley and add to tarray
-	var troll = new google.maps.Marker({
-		position : tlatlng,
-		title    : tname
-	});
-		
-	troll.setMap(map);
-	upd.marker = troll;
-	tarray.push(upd);
-	//if trolley has been inactive for a looong while, remove object
 }
 
 /**
@@ -669,10 +550,8 @@ function getRoute(stopArray){
 	
 	var max = Math.max.apply(Math,scores);
 	var index = scores.indexOf(max);
-
-	//console.log("Matching route '"+route_array[index].title+"' with a "+scores[index]*100+" hit percent.");
 	
-	return {"index" : index};
+	return {"index" : index, "percent": scores[index]*100};
 }
 
 /**
@@ -943,71 +822,6 @@ function initStopMarkers(){
 	});
 }
 
-
-
-/**
- *	Description: 
- * 	Animates a virtual trolley along a route for the purpose of testing several functions.
- */
-function initSimulatorStuff(){
-	var bus = '../css/images/icons-simple/bus.png';
-	
-	route1_trolley = new google.maps.Marker({
-		position : Palacio[0],
-		title : "pala_trolley",
-		icon: bus,
-		visible : true
-	});
-	
-	route2_trolley = new google.maps.Marker({
-		position : Zoologico[0],
-		title : "zool_trolley",
-		icon: bus,
-		visible : false
-	});
-	
-	route3_trolley = new google.maps.Marker({
-		position : Interno[0],
-		title : "interno_trolley",
-		icon: bus,
-		visible : false
-	});
-	
-	route4_trolley = new google.maps.Marker({
-		position : Terrace[0],
-		title : "terr_trolley",
-		icon: bus,
-		visible : false
-	});
-	
-	route5_trolley = new google.maps.Marker({
-		position : Darlington[0],
-		title : "darl_trolley",
-		icon: bus,
-		visible : false
-	});
-	
-	var interno_poly = new google.maps.Polyline({path : Interno, map: map, visible : false});
-	var pala_poly = new google.maps.Polyline({path : Palacio, map: map, visible : false});
-	var terr_poly = new google.maps.Polyline({path : Terrace, map: map, visible : false});
-	var zool_poly = new google.maps.Polyline({path : Zoologico, map: map, visible : false});
-	var darl_poly = new google.maps.Polyline({path : Darlington, map: map, visible : false});
-	
-	route1_trolley.setMap(map);
-	route2_trolley.setMap(map);
-	route3_trolley.setMap(map);
-	route4_trolley.setMap(map);
-	route5_trolley.setMap(map);
-	
-	trolley_array = [route1_trolley,route2_trolley,route3_trolley,route4_trolley,route5_trolley];
-	
-	//animateMarker("T0_Palacio",route1_trolley,Palacio,pala_poly,stop_array[0].value.getPosition(),1);
-	//animateMarker("T1_Zoologico",route2_trolley,Zoologico,zool_poly,stop_array[1].value.getPosition(),1);
-	animateMarker("T2_Interno",route3_trolley,Interno,interno_poly,stop_array[2].value.getPosition(),1);
-	//animateMarker("T3_Terrace",route4_trolley,Terrace,terr_poly,stop_array[3].value.getPosition(),1);
-	//animateMarker("T4_Darlington",route5_trolley,Darlington,darl_poly,stop_array[4].value.getPosition(),1);
-}
-
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 /// GMaps Event Listeners-------------------------------------------------------------------------------------------///
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1087,6 +901,9 @@ $(document).on('click', "#eta-clear", function() {
 	});
 });
 */
+
+//function refreshETA(tid,stop,tlatlng){}
+
 $(document).on('click', "#calculate-eta", function() {
 	var the_stop = $('#select-stop').val();
 	var the_route = $('#select-route').val();
@@ -1267,4 +1084,188 @@ function createNodes(rpath,threshold){
 	console.log("Done! 'createNodes' finished execution in "+exec_time+" ms. New array is "+placedMarkerPos.getPath().getLength()+ " points long.");
 	return ({"latlngs" : placedMarkerPos.getPath(), "markers" : marker_array});
 }
+
+/**
+ *	Description:
+ * 	Animates a marker representation of a trolley along a route.
+ * 	
+ * 	Params:
+ *	tmarker - the trolley marker
+ * 	tmarker_path - the path the trolley is to follow
+ * 	rpoly - route polyline used as reference to check whether trolley coordinates lie on it
+ * 	slatlng - the coordinates of a station, used to test other functions such as getDistanceAcrossPath() and getETA()
+ * 	dir - the direction of the trolley with respect to route, 1 for CCW, 0 for CW.
+ *
+function animateMarker(tid,tmarker,tmarker_path,rpoly,slatlng,dir) {
+	if (arguments.length == 4) {
+		var coords;
+		var index = 0;
+		var lastEta = -1;
+		var thisEta = 0;
+		var lastStop = "";
+		
+		setInterval(function() {
+			coords = tmarker_path[index % tmarker_path.length];
+			index++;
+			//tmarker.setVisible(google.maps.geometry.poly.isLocationOnEdge(coords, rpoly, 0.0005));
+			tmarker.setPosition(coords);
+		}, 100);
+	} else if (arguments.length == 6) {
+		var tlatlng;
+		var index = 0;
+		var res;
+		var ret;
+		var traversed = [];
+		var indexes = [];
+		setInterval(function() {
+			tlatlng = tmarker_path[index % tmarker_path.length];
+			index++;
+			tmarker.setPosition(tlatlng);
+			var dist = 20;
+			thisEta = Math.round(getETA(dist.len,45));
+			if(lastEta != thisEta){
+				//console.log("ETA: "+thisEta+" seconds");
+			}
+			
+			ret = getClosestStop(tlatlng);
+			if((ret.dist < 30) && (ret.stop.key != lastStop)){
+				traversed.unshift(ret.stop.key);
+				indexes.unshift(ret.index);
+				lastStop = ret.stop.key;
+				if(traversed.length > 10){
+					traversed.pop();
+					indexes.pop();
+				}
+
+				console.log("Trolley with ID '"+tid+"' passing by the '"+traversed[0]+"' stop");
+				var the_route = getRoute(indexes);
+				console.log("Current direction: "+getDirection(indexes,the_route));
+				stop = stop_array[14];
+				sname = stop.value.getTitle();
+				slatlng = stop.value.getPosition();
+				console.log("Distance to stop: "+sname+" is "+getDistanceAcrossPath(slatlng,tlatlng,(new google.maps.Polyline({path: Interno})).getPath(),route_array[the_route.index].type,getDirection(indexes,the_route)).len);
+				console.log("--------------------------------------------");
+			}
+
+			lastEta = Math.round(getETA(dist.len,45));
+		}, 100);
+	}
+}
+
+
+/**
+ *	Description:
+ *  Calculates an estimate of time before the next bus arrives
+ * 
+ * 	Params:
+ * 	distance - the distance in meters that corresponds to the length of a segment of a route between trolley and stop
+ * 	velocity - average velocity of the trolley
+ *
+function getETA(distance,velocity){
+	return distance/velocity;
+}
+
+/**
+ *	Description:
+ * 	Animates a marker representation of a trolley according to the updates received. Creates a new marker if the 
+ * 	  trolley was not found in the array.
+ * 	
+ * 	Params:
+ *	tarray - the array containing all active trolleys
+ * 	upd - an object containing trolleyid, coordinates and timestamp. 	
+ *
+function applyUpdate(tarray,upd) {
+	var date = new Date(upd.date*1000);
+	var hours = date.getHours();
+	var minutes = date.getMinutes();
+	var seconds = date.getSeconds();
+	
+	var tname = upd.name;
+	var tlatlng = new google.maps.LatLng(upd.lat,upd.lng);
+	var formattedTime = hours + ':' + minutes + ':' + seconds;
+	
+	console.log("Trolley: "+tname+", Coords: "+tlatlng+", Date: "+formattedTime);
+	
+	for (var i = 0; i < tarray.length; i++) {
+	    if (tarray[i].name == tname){
+	    	tarray[i].marker.setPosition(tlatlng);
+	    	return;
+	    }
+	}
+	
+	//trolley was not found, create trolley and add to tarray
+	var troll = new google.maps.Marker({
+		position : tlatlng,
+		title    : tname
+	});
+		
+	troll.setMap(map);
+	upd.marker = troll;
+	tarray.push(upd);
+	//if trolley has been inactive for a looong while, remove object
+}
+
+/**
+ *	Description: 
+ * 	Animates a virtual trolley along a route for the purpose of testing several functions.
+ *
+function initSimulatorStuff(){
+	var bus = '../css/images/icons-simple/bus.png';
+	
+	route1_trolley = new google.maps.Marker({
+		position : Palacio[0],
+		title : "pala_trolley",
+		icon: bus,
+		visible : true
+	});
+	
+	route2_trolley = new google.maps.Marker({
+		position : Zoologico[0],
+		title : "zool_trolley",
+		icon: bus,
+		visible : false
+	});
+	
+	route3_trolley = new google.maps.Marker({
+		position : Interno[0],
+		title : "interno_trolley",
+		icon: bus,
+		visible : false
+	});
+	
+	route4_trolley = new google.maps.Marker({
+		position : Terrace[0],
+		title : "terr_trolley",
+		icon: bus,
+		visible : false
+	});
+	
+	route5_trolley = new google.maps.Marker({
+		position : Darlington[0],
+		title : "darl_trolley",
+		icon: bus,
+		visible : false
+	});
+	
+	var interno_poly = new google.maps.Polyline({path : Interno, map: map, visible : false});
+	var pala_poly = new google.maps.Polyline({path : Palacio, map: map, visible : false});
+	var terr_poly = new google.maps.Polyline({path : Terrace, map: map, visible : false});
+	var zool_poly = new google.maps.Polyline({path : Zoologico, map: map, visible : false});
+	var darl_poly = new google.maps.Polyline({path : Darlington, map: map, visible : false});
+	
+	route1_trolley.setMap(map);
+	route2_trolley.setMap(map);
+	route3_trolley.setMap(map);
+	route4_trolley.setMap(map);
+	route5_trolley.setMap(map);
+	
+	trolley_array = [route1_trolley,route2_trolley,route3_trolley,route4_trolley,route5_trolley];
+	
+	animateMarker("T0_Palacio",route1_trolley,Palacio,pala_poly,stop_array[0].value.getPosition(),1);
+	animateMarker("T1_Zoologico",route2_trolley,Zoologico,zool_poly,stop_array[1].value.getPosition(),1);
+	animateMarker("T2_Interno",route3_trolley,Interno,interno_poly,stop_array[2].value.getPosition(),1);
+	animateMarker("T3_Terrace",route4_trolley,Terrace,terr_poly,stop_array[3].value.getPosition(),1);
+	animateMarker("T4_Darlington",route5_trolley,Darlington,darl_poly,stop_array[4].value.getPosition(),1);
+}
+
 */

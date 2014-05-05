@@ -26,7 +26,8 @@
 				if (socket !== undefined) {
 					socket.on('mapUpdate', function(update) {												
 						var upd = JSON.parse(update);				
-						console.log(upd);						
+						console.log(upd);
+						processUpdate(upd);
 					});
 				}
 			};
