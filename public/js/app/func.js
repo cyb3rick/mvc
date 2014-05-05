@@ -42,8 +42,8 @@ function Trolley(id,lat,lng,date){
 	
 	var latt = new String(parseFloat(lat));
 	var lngg = new String(parseFloat(lng));
-	latt = parseFloat(latt.substring(0,2))+(parseFloat(latt.substring(2,4))/60)+(parseFloat(latt.substring(5))/36000);
-	lngg = -1*(parseFloat(lngg.substring(0,2))+(parseFloat(lngg.substring(2,4))/60)+(parseFloat(lngg.substring(5))/36000));
+	latt = parseFloat(latt.substring(0,2))+(parseFloat(latt.substring(2,4))/60)+(parseFloat(latt.substring(4))/3600);
+	lngg = -1*(parseFloat(lngg.substring(0,2))+(parseFloat(lngg.substring(2,4))/60)+(parseFloat(lngg.substring(4))/3600));
 	this.latlng = new google.maps.LatLng(latt,lngg);
 			
 	// debug
@@ -82,8 +82,12 @@ function processUpdate(upd) {
 		// Process coordinates
 		var latt = new String(parseFloat(upd.lat));
 		var lngg = new String(parseFloat(upd.lng));
-		latt = parseFloat(latt.substring(0,2))+(parseFloat(latt.substring(2,4))/60)+(parseFloat(latt.substring(5))/36000);
-		lngg = -1*(parseFloat(lngg.substring(0,2))+(parseFloat(lngg.substring(2,4))/60)+(parseFloat(lngg.substring(5))/36000));
+		
+		console.log();
+		
+		
+		//latt = parseFloat(latt.substring(0,2))+(parseFloat(latt.substring(2,4))/60)+(parseFloat(latt.substring(4))/3600);
+		//lngg = -1*(parseFloat(lngg.substring(0,2))+(parseFloat(lngg.substring(2,4))/60)+(parseFloat(lngg.substring(4))/3600));
 		t.latlng = new google.maps.LatLng(latt,lngg);		
 		t.date = upd.date;
 		
