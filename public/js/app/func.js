@@ -32,10 +32,10 @@ google.maps.event.addDomListener(window, "load", initialize);
  * dir - the direction of the trolley within the route
  * stopArray - and array containing the past stops traveres by the trolley
  */
-function Trolley(id,lat,lng,time){
+function Trolley(id,lat,lng,date){
 	this.id = id;
 	this.latlng = new google.maps.LatLng(lat,lng);
-	this.time = time;
+	this.date = date;
 	this.stopsTraversed = [];
 	this.route = undefined;
 	this.dir = undefined;
@@ -64,7 +64,7 @@ function processUpdate(upd){
 	if(tindex >= 0){
 		t = trolley_array[tindex];
 		t.latlng = new google.maps.LatLng(upd.lat,upd.lng);
-		t.time = upd.time;
+		t.date = upd.date;
 		closestStop = getClosestStop(t.latlng);
 		
 		if((closestStop.dist < 30) && (closestStop.index != t.stopsTraversed[0])){
@@ -74,7 +74,7 @@ function processUpdate(upd){
 			}
 		}
 		
-		t.velocities.unshift(upd.velocity);	
+		t.velocities.unshift(upd.speed);	
 		while(t.velocities.length > 36){
 			t.velocities.pop();
 		}
@@ -82,17 +82,17 @@ function processUpdate(upd){
 		t.route = getRoute(stopsTraversed).index;
 		t.dir = getDirection(stopsTraversed,routeIndex);
 		
-		var sum = t.velocities.reduce(function(a, b) { return a + b });
+		var sum = t.velocities.reduce(function(a, b) { return a + b; });
 		var avg = sum / t.velocities.length;
 		t.avgVelocity = avg;
 		
 		t.marker.setPosition(t.latlng);
-		t.marker.setVisible(google.maps.geometry.poly.containsLocation(t.latlng,Campus) && !(t.avgVelocity==0));
+		t.marker.setVisible(google.maps.geometry.poly.containsLocation(t.latlng,Campus) && !(t.avgVelocity < 1));
 	}
 	else{
 		t = new Trolley(upd.id,upd.lat,upd.lng,upd.time);
-		t.velocities.unshift(upd.velocity);
-		t.avgVelocity = upd.velocity;
+		t.velocities.unshift(upd.speed);
+		t.avgVelocity = upd.speed;
 		
 		if(closestStop.dist < 30){
 			t.stopsTraversed.unshift(t.latlng);
@@ -107,7 +107,7 @@ function processUpdate(upd){
             title: t.id
 		});
 		
-		t.marker.setVisible(google.maps.geometry.poly.containsLocation(t.latlng,Campus) && !(t.avgVelocity==0));
+		t.marker.setVisible(google.maps.geometry.poly.containsLocation(t.latlng,Campus) && !(t.avgVelocity<1));
 		trolley_array.push(t);
 	}
 }
