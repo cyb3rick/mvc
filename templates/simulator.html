@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="UTF-8" />
+		<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+		<title>TrolleyTracker</title>
+		<meta name="viewport" content="width=device-width, initial-scale=1" />
+		<link rel="stylesheet" href="/css/style.css" />
+	</head>
+
+	<body>
+		<header>
+			View: Simulator
+		</header>
+
+		<div class="container">
+			<div id="trolleys">
+				<!-- trolleys are dynamically inserted here -->
+			</div>
+			<!-- /trolleys -->
+
+			<div class="controls">
+				<select class="routeOptions">
+					<option value="interno">Interno</option>
+					<option value="palacio">Palacio</option>
+					<option value="darlington">Darlington</option>
+					<option value="zoo">Zoo</option>
+				</select>
+				<input type="submit" value="Add Trolley" />
+			</div>
+		</div><!-- /container -->
+
+		<!-- scripts -->	
+		<script type="text/javascript" src="https://maps.googleapis.com/maps/api/js?libraries=geometry&sensor=false"></script>	
+		<script type="text/javascript" src="/js/jquery-1.11.0.min.js"></script>
+		<script src="/socket.io/socket.io.js"></script>
+		<script type="text/javascript" src="/js/simulator.js"></script>
+	</body>
+</html>

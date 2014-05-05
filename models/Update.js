@@ -56,7 +56,7 @@ var UpdateModel = baseModel.extend({
 		this.db.collection('updates')
 			.find({'date': {$gte: start, $lt: end}})
 				.toArray(callback);	
-	}
+	}	
 });
 
 module.exports = UpdateModel;

@@ -41,6 +41,9 @@ MongoClient.connect(mongoURL, function(err, db) {
 	if (!err) {
 		// Connected successfully to DB.
 
+		//Get 'updates' collection from DB
+		var updCol = db.collection('updates');
+
 		// TODO: Add event listeners here
 
 		// Controllers
@@ -75,6 +78,13 @@ MongoClient.connect(mongoURL, function(err, db) {
 		});
 		app.all('/admin/logout', function(req, res, next) {
 			AdminCtrl.logout(req, res, next);
+		});
+
+		app.get('/admin/password/update', function(req, res, next) {
+			AdminCtrl.detailPassword();
+		});
+		app.post('/admin/password/update', function(req, res, next) {
+			AdminCtrl.updatePassword();
 		});
 
 		//Admin announcements
@@ -117,6 +127,10 @@ MongoClient.connect(mongoURL, function(err, db) {
 			RestApiCtrl.run(req, res, next);
 		});
 
+		app.get('/sim', attachDB, function(req, res, next) {
+			res.render('simulator.html');
+		});
+
 		//Start listening for HTTP requests
 		//http.createServer(app).listen(config.port, function() {
 		//	console.log("Listening on port " + config.port);
@@ -130,31 +144,44 @@ MongoClient.connect(mongoURL, function(err, db) {
 			var addr = server.address();
 			console.log("Sever listening on UDP port " + addr.port);
 		});
-	
-		// Bind server to UDP port 8000		
+
+		// Bind server to UDP port 8000
 		server.bind(8000);
 
 		//When someone connects through socket.io
 		io.listen(app.listen(config.port)).on('connection', function(socket) {
 
+			socket.on('upd', function(update) {				
+				//Stringify the object
+				var updateStr = JSON.stringify(update) + "\n";
+				//Emit map update TODO: do NOT broadcast, emit to room only
+				socket.broadcast.emit('mapUpdate', updateStr);				
+			});
+
 			//Debug
 			console.log("New client connected.");
-			
+
 			// Subscribe to update events
 			eventEmitter.on('update', function(data) {
 				var dataStr = data.toString();
-				var updateStr = JSON.stringify({
-					ID : dataStr.substring(0,2),
-					lat : dataStr.substring(2,11),
-					lng	: dataStr.substring(11,21)
-				});
-				
+
+				var updateObj = {
+					trolleyId : "00",
+					lat : dataStr.substring(0, 9),
+					lng : dataStr.substring(9, 19),
+					speed : parseFloat(dataStr.substring(19, 23)) * 1.15078,
+					date : new Date()
+				};
+
 				// TODO: Store in database
-				
+				updCol.insert(updateObj, function() {
+					console.log("Saved!");
+				});
+
 				// Broadcast to connected clients
-				socket.broadcast.emit('mapUpdate', updateStr);
+				socket.broadcast.emit('mapUpdate', JSON.stringify(updateObj));
 			});
-			
+
 		});
 
 	} else {
