@@ -40,10 +40,10 @@ function degToDec(deg) {
 function Trolley(id,lat,lng,date){
 	this.id = id;
 	
-	var latt = new String(parseFloat(lat));
-	var lngg = new String(parseFloat(lng));
-	latt = parseFloat(latt.substring(0,2))+(parseFloat(latt.substring(2,4))/60)+(parseFloat(latt.substring(4))/3600);
-	lngg = -1*(parseFloat(lngg.substring(0,2))+(parseFloat(lngg.substring(2,4))/60)+(parseFloat(lngg.substring(4))/3600));
+	var latt = parseFloat(lat)/100;
+	var lngg = -1*parseFloat(lng)/100;
+	//latt = parseFloat(latt.substring(0,2))+(parseFloat(latt.substring(2,4))/60)+(parseFloat(latt.substring(4))/3600);
+	//lngg = -1*(parseFloat(lngg.substring(0,2))+(parseFloat(lngg.substring(2,4))/60)+(parseFloat(lngg.substring(4))/3600));
 	this.latlng = new google.maps.LatLng(latt,lngg);
 			
 	// debug
@@ -80,8 +80,8 @@ function processUpdate(upd) {
 		var t = trolley_array[tindex];	
 		
 		// Process coordinates
-		var latt = new String(parseFloat(upd.lat));
-		var lngg = new String(parseFloat(upd.lng));
+		var latt = parseFloat(upd.lat)/100;
+		var lngg = -1*parseFloat(upd.lng)/100;
 		
 		console.log();
 		
