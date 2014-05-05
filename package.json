@@ -29,7 +29,8 @@
     "ejs": "*",
     "mongodb": "*",
  	"moment": "*",
- 	"nodemailer": "*"
+ 	"nodemailer": "*",
+ 	"socket.io": "*"
   },
   "devDependencies": {
   	"jasmine-node": "*"    

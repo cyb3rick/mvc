@@ -12,6 +12,9 @@
 	<% include admin-panel.html %>
 	
 	<div role="main" class="ui-content">
+		
+		<!-- Error messages from data validation -->
+		<div id="error-message-wrapper" class="ui-bar ui-bar-b ui-corner-all" style="display:none"></div>
 
 		<!-- Accordion for create announcement form -->
 		<div data-role="collapsibleset" data-content-theme="a" data-iconpos="right" id="insert">
@@ -22,17 +25,32 @@
 				<!-- Add announcement form -->
 				<form method="post" action="/admin/announcements/create" data-ajax="false">
 					<label for="text-basic">Title of Announcement</label>
-					<input id="announTitleIn" type="text" name="title" />
+					<input id="announTitleIn" type="text" name="title" data-validation="required" />
 					<label for="textarea">Message</label>
-					<textarea id="announBodyIn" name="body"></textarea>
+					<textarea id="announBodyIn" name="body" data-validation="required"></textarea>
 					<label for="date">Start Date</label>
-					<input type="date" name="startDate" />
+					<input type="date" name="startDate" data-validation="date" data-validation-format="yyyy-mm-dd" />
 					<label for="date">End Date</label>
-					<input type="date" name="endDate" />
-					<input type="submit" value="Create Announcement" />
-					<input type="reset" value="Reset" />
+					<input type="date" name="endDate" data-validation="date" data-validation-format="yyyy-mm-dd" />
+					<input type="submit" value="Create Announcement" />					
 				</form><!-- /form -->
-
+				
+				<!-- Enables form validation. Needs to be placed
+					 _after_ form has been loaded in DOM -->
+				<script>			
+					var errors = $('#error-message-wrapper');
+					$.validate({
+						validateOnBlur: false,
+						errorMessagePosition: errors,
+						onError: function() {
+							errors.css('display', 'block');					
+						},
+						onSuccess: function() {
+							errors.css('display', 'none');
+						}				
+					});
+				</script>
+				
 			</div>
 		</div><!-- /collapsibleset -->
 

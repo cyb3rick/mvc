@@ -1,12 +1,22 @@
 <% include header.html %>
 
 <!-- Login content here -->
-<div data-role="page" id="page1">
+<div data-role="page">
+	
 	<div data-role="header">
 		<h1><%= content %></h1>
 	</div>
-
+	
+	<!-- Error messages from data validation -->
+	<div id="error-message-wrapper" class="ui-bar ui-bar-b ui-corner-all pop-like-width" style="display:none"></div>
+	
+	
+	
 	<div role="main" class="ui-content pop-like-width">
+		
+		<div class="pop-like-width">
+			<img src="/imgs/TrolleyTracker_logo_rectangle.png" style="width:100%" />
+		</div>
 
 		<!--
 		The <%= from %> is so that when I access
@@ -16,10 +26,26 @@
 		first place and not thrown somewhere else.
 		-->
 		<form method="post" action="<%= from %>" data-ajax="false">
-			<input type="text" name="username" />
-			<input type="password" name="password" />
+			<input type="text" name="username" data-validation="required" />
+			<input type="password" name="password" data-validation="required" />
 			<input type="submit" value="Login" />
 		</form>
+		
+		<!-- Enables form validation. Needs to be placed
+			 _after_ form has been loaded in DOM -->
+		<script>			
+			var errors = $('#error-message-wrapper');
+			$.validate({
+				validateOnBlur: false,
+				errorMessagePosition: errors,
+				onError: function() {
+					errors.css('display', 'block');					
+				},
+				onSuccess: function() {
+					errors.css('display', 'none');
+				}				
+			});
+		</script>
 	</div>
 </div>
 <% include footer.html %>

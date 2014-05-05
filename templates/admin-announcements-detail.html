@@ -12,20 +12,38 @@
 	<% include admin-panel.html %>
 		
 	<div role="main" class="ui-content">
+		
+		<!-- Error messages from data validation -->
+		<div id="error-message-wrapper" class="ui-bar ui-bar-b ui-corner-all" style="display:none"></div>
 
 		<form method="post" action="/admin/announcements/update/<%= announ._id %>" data-ajax="false">
-
-			<input id="announTitleIn" type="text" name="title" value="<%= announ.title %>" />
-			<textarea id="announBodyIn" name="body"><%= announ.body %></textarea>
-			<input type="date" name="startDate" value="<%= announ.startDate %>" />
-			<input type="date" name="endDate" value="<%= announ.endDate %>" />
+			<input id="announTitleIn" type="text" name="title" value="<%= announ.title %>" data-validation="required" />
+			<textarea id="announBodyIn" name="body" data-validation="required"><%= announ.body %></textarea>
+			<input type="date" name="startDate" value="<%= announ.startDate %>" data-validation="date" data-validation-format="yyyy-mm-dd" />
+			<input type="date" name="endDate" value="<%= announ.endDate %>" data-validation="date" data-validation-format="yyyy-mm-dd" />
 			<input type="submit" value="Update" />
-
 		</form>
+		
+		<!-- Enables form validation. Needs to be placed
+			 _after_ form has been loaded in DOM -->
+		<script>			
+			var errors = $('#error-message-wrapper');
+			$.validate({
+				validateOnBlur: false,
+				errorMessagePosition: errors,
+				onError: function() {
+					errors.css('display', 'block');					
+				},
+				onSuccess: function() {
+					errors.css('display', 'none');
+				}				
+			});
+		</script>
 		
 		<!-- Back btn -->
 		<a href="/admin/announcements" data-ajax="false" data-role="button" data-inline="true" data-icon="back">Announcements</a>
 				
 	</div>
 </div>
+
 <% include footer.html %>

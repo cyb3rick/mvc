@@ -5,7 +5,7 @@
 		<title> <%= title %> </title>
 		<link rel="stylesheet" href="/css/style.css" />
 		<link rel="stylesheet" href="http://code.jquery.com/mobile/1.4.2/jquery.mobile-1.4.2.min.css" />
-		
+
 		<!-- NOTE: See what can be moved to below body for faster loading -->
 		<script type="text/javascript" src="https://maps.googleapis.com/maps/api/js?libraries=geometry&sensor=false"></script>
 		<script src="http://code.jquery.com/jquery-1.9.1.min.js"></script>
@@ -15,6 +15,22 @@
 		<!-- Form validation, jquery plugin -->
 		<script src="//cdnjs.cloudflare.com/ajax/libs/jquery-form-validator/2.1.47/jquery.form-validator.min.js"></script>
 
+		<!-- Websockets -->
+		<script src="/socket.io/socket.io.js"></script>
+
+		<script>
+			window.onload = function() {
+				//Connect to socket.io and store connection
+				socket = io.connect(window.location.origin);
+				//Subscribe to mapUpdates events through socket.io
+				if (socket !== undefined) {
+					socket.on('mapUpdate', function(update) {												
+						var upd = JSON.parse(update);				
+						console.log(upd);						
+					});
+				}
+			};
+		</script>
 	</head>
 
 	<body>
