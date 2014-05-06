@@ -1053,10 +1053,10 @@ function showEta(){
 		console.log(stop_index);
 		console.log(route_index);
 		console.log(trolley_array[0].latlng);
-		console.log(trolley_array[0].tdir);
+		console.log(trolley_array[0].dir);
 		console.log(trolley_array[0].avgVelocity);
 		
-		var pre_eta = getEta(stop_index,route_index,trolley_array[0].latlng,trolley_array[0].tdir,trolley_array[0].avgVelocity);
+		var pre_eta = getEta(stop_index,route_index,trolley_array[0].latlng,trolley_array[0].dir,trolley_array[0].avgVelocity);
 		console.log(pre_eta);
 		var eta = Math.ceil(pre_eta/60);
 		console.log(pre_eta);
