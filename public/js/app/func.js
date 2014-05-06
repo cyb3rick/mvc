@@ -146,7 +146,7 @@ function processUpdate(upd) {
 			}
 		}*/
 		
-		t.stopsTraversed.unshift(t.latlng);
+		t.pointsTraversed.unshift(t.latlng);
 		
 		while (t.pointsTraversed.length > 10){
 			t.pointsTraversed.pop();
