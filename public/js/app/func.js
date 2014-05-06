@@ -164,7 +164,7 @@ function processUpdate(upd) {
 			t.velocities.pop();
 		}
 		
-		t.route = getRoute2(t.pointsTraversed).index;
+		t.route = getRoute2(t.pointsTraversed);
 		console.log("Route (best match) " + route_array[t.route].value.getTitle());	
 		t.dir = getDirection2(t.route,t.pointsTraversed);
 		
