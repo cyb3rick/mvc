@@ -1050,9 +1050,16 @@ function showEta(){
 				stop_index = i;
 			}
 		}
-
+		console.log(stop_index);
+		console.log(route_index);
+		console.log(trolley_array[0].latlng);
+		console.log(trolley_array[0].tdir);
+		console.log(trolley_array[0].avgVelocity);
+		
 		var pre_eta = getEta(stop_index,route_index,trolley_array[0].latlng,trolley_array[0].tdir,trolley_array[0].avgVelocity);
+		console.log(pre_eta);
 		var eta = Math.ceil(pre_eta/60);
+		console.log(pre_eta);
 		
 		if(eta){
 			var html = "<div class=ui-grid-b>";
@@ -1068,7 +1075,7 @@ function showEta(){
 	    	$("#eta-popup").popup("close");
 	    }
 	    else{
-	    	alert("Eta cannot be calculated for the selected trolley.");
+	    	console.log("Eta cannot be calculated for the selected trolley.");
 	    }
 	}
 	else{
