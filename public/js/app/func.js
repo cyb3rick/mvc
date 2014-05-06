@@ -61,7 +61,7 @@ function getRoute2(upd_array){
 		min_rindex = -1;
 		for(var j=0; j < route_array.length; j++){
 			curr_dist = closestPointOnPath(route_array[j].value.getPath(),upd_array[i]).dist;
-			if(curr_dist < min || i==0 ){
+			if(curr_dist < min || j==0 ){
 				min = curr_dist;
 				min_rindex = j;
 				console.log("Min distance: "+min);
