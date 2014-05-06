@@ -145,7 +145,7 @@ function processUpdate(upd) {
 
 		t.date = upd.date;
 		
-		map.setCenter(t.latlng);
+		map.setCenter(t.latlng);  
 		
 		//var closestStop = getClosestStop(t.latlng); 				
 		/*if ((closestStop.dist < 30) && (closestStop.index != t.stopsTraversed[0])) {
@@ -183,7 +183,9 @@ function processUpdate(upd) {
 		t.marker.setPosition(t.latlng);
 		//t.marker.setVisible(google.maps.geometry.poly.containsLocation(t.latlng,Campus) && !(t.avgVelocity < 1));
 		
-
+		if(eta_requested){
+		    showEta();
+		}
 		console.log("Current direction: "+t.dir);
 		console.log("--------------------------------------------");
 	}
@@ -991,6 +993,7 @@ $(document).on('click', "#options-clear-eta", function() {
 	$("#eta-bar").css({
 		'height': '6px',
 	});
+	eta_requested = false;
 });
 
 /*
@@ -1058,14 +1061,15 @@ function showEta(){
 		
 		var pre_eta = getEta(stop_index,route_index,trolley_array[0].latlng,trolley_array[0].dir,trolley_array[0].avgVelocity);
 		console.log(pre_eta);
-		var eta = Math.ceil(pre_eta/60);
+		var eta = Math.ceil(pre_eta);
 		console.log(pre_eta);
 		
 		if(eta){
+			eta_requested = true;
 			var html = "<div class=ui-grid-b>";
 			html +=   "<div class=ui-block-a><center>Stop: "+the_stop.getTitle()+"</center></div>";
 			html +=   "<div class=ui-block-b><center>Route: "+the_route.title+"</center></div>";
-			html +=   "<div class=ui-block-c><center>"+eta+" min</center></div>";
+			html +=   "<div class=ui-block-c><center>"+eta+" s</center></div>";
 			html += "</div>";
 			$( "#eta-bar" ).html(html);
 		    $('#eta-bar').css({

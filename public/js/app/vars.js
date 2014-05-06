@@ -9,6 +9,7 @@ var mylocation =  new google.maps.Marker({title : "My Location"});
 var all = [];
 
 var trolley_array = [];
+var eta_requested = false;
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 ///	CAMPUS BOUNDS																									///
