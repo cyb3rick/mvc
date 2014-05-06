@@ -39,11 +39,11 @@ function degToDec(deg) {
  */
 function Trolley(id,lat,lng,date){
 	this.id = id;
-	
+
 	var latt = new String(parseFloat(lat));
-	var lngg = new String(parseFloat(lng));	
-	latt = parseFloat(latt.substring(0,2))+(parseFloat(latt.substring(2,4))/60)+(parseFloat(latt.substring(5))/36000);
-	lngg = -1*(parseFloat(lngg.substring(0,2))+(parseFloat(lngg.substring(2,4))/60)+(parseFloat(lngg.substring(5))/36000));
+	var lngg = new String(parseFloat(lng));
+	latt = parseFloat(latt.substring(0,2))+(parseFloat(latt.substring(2,7))/60)+parseFloat(("."+parseFloat(latt.substring(7))/3600));
+	lngg = -1*(parseFloat(lngg.substring(0,2))+(parseFloat(lngg.substring(2,7))/60)+parseFloat(("."+parseFloat(lngg.substring(7))/3600)));
 			
 	this.latlng = new google.maps.LatLng(latt,lngg);
 	// debug
@@ -57,7 +57,7 @@ function Trolley(id,lat,lng,date){
 	this.dir = undefined;
 	this.velocities = [];
 	this.avgVelocity;
-	this.marker = new google.maps.Marker();
+	this.marker = new google.maps.Marker({position: this.latlng, visible: true, map: map});
 };
 
 /**
@@ -79,11 +79,10 @@ function processUpdate(upd) {
 		
 		var t = trolley_array[tindex];	
 		
-		// Process coordinates
 		var latt = new String(parseFloat(upd.lat));
 		var lngg = new String(parseFloat(upd.lng));
-		latt = parseFloat(latt.substring(0,2))+(parseFloat(latt.substring(2,4))/60)+(parseFloat(latt.substring(5))/36000);
-		lngg = -1*(parseFloat(lngg.substring(0,2))+(parseFloat(lngg.substring(2,4))/60)+(parseFloat(lngg.substring(5))/36000));
+		latt = parseFloat(latt.substring(0,2))+(parseFloat(latt.substring(2,7))/60)+parseFloat(("."+parseFloat(latt.substring(7))/3600));
+		lngg = -1*(parseFloat(lngg.substring(0,2))+(parseFloat(lngg.substring(2,7))/60)+parseFloat(("."+parseFloat(lngg.substring(7))/3600)));
 		t.latlng = new google.maps.LatLng(latt,lngg);			
 		t.date = upd.date;
 		
@@ -108,7 +107,7 @@ function processUpdate(upd) {
 		t.avgVelocity = avg;
 		
 		t.marker.setPosition(t.latlng);
-		t.marker.setVisible(google.maps.geometry.poly.containsLocation(t.latlng,Campus) && !(t.avgVelocity < 1));
+		//t.marker.setVisible(google.maps.geometry.poly.containsLocation(t.latlng,Campus) && !(t.avgVelocity < 1));
 	}
 	else {
 		var t = new Trolley(upd.id,upd.lat,upd.lng,upd.time);
@@ -133,7 +132,7 @@ function processUpdate(upd) {
 		console.log("Is Contained: " + isContainedInCampus);	
 		console.log("Has avg vel below 1 " + avgVelNearZero);
 					
-		t.marker.setVisible(isContainedInCampus && avgVelNearZero);
+		//t.marker.setVisible(isContainedInCampus && avgVelNearZero);
 		trolley_array.push(t);
 	}
 	
@@ -932,36 +931,68 @@ $(document).on('click', "#eta-clear", function() {
 
 //function refreshETA(tid,stop,tlatlng){}
 
+$(document).on('click', "#select-route", function() {
+	var stop_key = $('#select-route').val();
+	if(stop_key != ""){
+		ShowRoute(stop_key);
+	}
+});
+
 $(document).on('click', "#calculate-eta", function() {
+	showEta();
+});
+
+function showEta(){
+	if(trolley_array.length == 0){
+		alert("There are no active trolleys.");
+		return;
+	}
+	
 	var the_stop = $('#select-stop').val();
 	var the_route = $('#select-route').val();
+	var stop_index;
+	var route_index;
 	
 	if(the_stop != "" && the_route != ""){
 		the_route = ShowRoute(the_route);
 		the_stop = ShowStop(the_stop);
-		//$( "#eta-stop" ).html("Stop: "+the_stop.getTitle());
-		//$( "#eta-route" ).html("Route: "+the_route.title);
-		//$( "#eta-eta" ).html("ETA: 10 min");
-		//$( "#eta-stop" ).css({	'display': 'block' });
-		//$( "#eta-route" ).css({ 'display': 'block' });
-		//$( "#eta-eta" ).css({	'display': 'block' });
-		//$( "#eta-clear" ).css({	'display': 'block' });
-		var html = "<div class=ui-grid-b>";
-		html +=   "<div class=ui-block-a><center>Stop: "+the_stop.getTitle()+"</center></div>";
-		html +=   "<div class=ui-block-b><center>Route: "+the_route.title+"</center></div>";
-		html +=   "<div class=ui-block-c><center>ETA: 10min</center></div>";
-		html += "</div>";
-		$( "#eta-bar" ).html(html);
-	    $('#eta-bar').css({
-	        'height': '22px'
-	    });
+		
+		for(var i=0; i<route_array.length; i++){
+			if(route_array[i].key == $('#select-route').val()){
+				route_index = i;
+			}
+		}
+		
+		for(var i=0; i<stop_array.length; i++){
+			if(stop_array[i].key == $('#select-stop').val()){
+				stop_index = i;
+			}
+		}
+
+		var pre_eta = getEta(stop_index,route_index,trolley_array[0].latlng,trolley_array[0].tdir,trolley_array[0].avgVelocity);
+		var eta = Math.ceil(pre_eta/60);
+		
+		if(eta){
+			var html = "<div class=ui-grid-b>";
+			html +=   "<div class=ui-block-a><center>Stop: "+the_stop.getTitle()+"</center></div>";
+			html +=   "<div class=ui-block-b><center>Route: "+the_route.title+"</center></div>";
+			html +=   "<div class=ui-block-c><center>"+eta+" min</center></div>";
+			html += "</div>";
+			$( "#eta-bar" ).html(html);
+		    $('#eta-bar').css({
+		        'height': '22px'
+		    });
 	    
-	    $("#eta-popup").popup("close");
+	    	$("#eta-popup").popup("close");
+	    }
+	    else{
+	    	alert("Eta cannot be calculated for the selected trolley.");
+	    }
 	}
 	else{
 		alert("Please select both a route and a stop.");
 	}
-});
+}
 
 $(document).on('change', 'input:radio[name="route-choice"]', function() {
 	ShowRoute($(this).val());
