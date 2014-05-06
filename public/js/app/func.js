@@ -54,16 +54,8 @@ function getRoute2(upd_array){
 	var scores = [];
 	var freqs = [0,0,0,0,0];
 	var count;
-	
-	for(var j=0; j < route_array.length; j++){
-		curr_dist = closestPointOnPath(route_array[j].value.getPath(),upd_array[i]).dist;
-		if(curr_dist < min || i==0 ){
-			min = curr_dist;
-			min_rindex = j;
-		}
-	}
-	
-	/*
+
+
 	for(var i=0; i < upd_array.length; i++){
 		min = 0;
 		min_rindex = -1;
@@ -78,14 +70,18 @@ function getRoute2(upd_array){
 		}
 		scores[i] = min_rindex;
 	}
+	
+	console.log(scores);
 
 	for(var i=0; i < scores.length; i++){
 		freqs[scores[i]]++;
 	}
 	
 	var freqIdx = Math.max.apply(null, freqs);
+	console.log(freqIdx);
 	var res = freqs.indexOf(freqIdx);
-	*/
+	console.log(res);
+
 	return min_rindex;
 }
 
