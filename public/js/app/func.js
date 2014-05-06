@@ -172,6 +172,7 @@ function processUpdate(upd) {
 		console.log("Route key: "+route_array[t.route].key);
 		console.log("Route (best match) " + route_array[t.route].title);	
 		t.dir = getDirection2(t.route,t.pointsTraversed);
+		console.log(t.dir);
 		
 		ShowRoute(route_array[t.route].key);
 		
