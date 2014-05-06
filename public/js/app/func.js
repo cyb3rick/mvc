@@ -71,8 +71,10 @@ function getRoute2(upd_array){
 	for(var i=0; i < scores.length; i++){
 		freqs[scores[i]]++;
 	}
-	
-	var res = freqs.indexOf(Math.max.apply(null, freqs));
+	var freqIdx = Math.max.apply(null, freqs);
+	console.log(freqIdx);
+	var res = freqs.indexOf(freqIdx);
+	console.log(res);
 	return res;
 }
 
