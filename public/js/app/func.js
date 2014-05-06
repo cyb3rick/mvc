@@ -61,16 +61,19 @@ function getRoute2(upd_array){
 			if(curr_dist < min || i==0 ){
 				min = curr_dist;
 				min_rindex = j;
+				console.log("Min distance: "+min);
+				console.log("Route index: "+min_rindex);
 			}
 		}
 		scores[i] = min_rindex;
 	}
-	
+
 	for(var i=0; i < scores.length; i++){
 		freqs[scores[i]]++;
 	}
-
-	return freqs.indexOf(Math.max.apply(null, freqs));
+	
+	var res = freqs.indexOf(Math.max.apply(null, freqs));
+	return res;
 }
 
 
@@ -104,8 +107,8 @@ function Trolley(id,lat,lng,date){
 	this.date = date;
 	//this.stopsTraversed = [];
 	this.pointsTraversed = [];
-	this.route = undefined;
-	this.dir = undefined;
+	this.route = -1;
+	this.dir = 0;
 	this.velocities = [];
 	this.avgVelocity;
 	this.marker = new google.maps.Marker({position: this.latlng, visible: true, map: map});
@@ -126,8 +129,7 @@ function processUpdate(upd) {
 	}
 		
 	if (tindex >= 0) {
-		var t = trolley_array[tindex];	
-
+		var t = trolley_array[tindex];
 		var latt = new String(parseFloat(upd.lat));
 		var lngg = new String(parseFloat(upd.lng));
 		latt = parseFloat(latt.substring(0,2))+(parseFloat(latt.substring(2,7))/60)+parseFloat(("."+parseFloat(latt.substring(7))/3600));
