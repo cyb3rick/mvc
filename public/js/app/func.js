@@ -1053,11 +1053,9 @@ function showEta(){
 				stop_index = i;
 			}
 		}
-		console.log(stop_index);
-		console.log(route_index);
-		console.log(trolley_array[0].latlng);
-		console.log(trolley_array[0].dir);
-		console.log(trolley_array[0].avgVelocity);
+
+		console.log("Avg velocity: (m/s)"+trolley_array[0].avgVelocity);
+		console.log("Avg velocity: (mi/hr)"+trolley_array[0].avgVelocity*2.23694);
 		
 		var pre_eta = getEta(stop_index,route_index,trolley_array[0].latlng,trolley_array[0].dir,trolley_array[0].avgVelocity);
 		console.log(pre_eta);
