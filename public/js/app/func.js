@@ -1059,15 +1059,15 @@ function showEta(){
 		
 		var pre_eta = getEta(stop_index,route_index,trolley_array[0].latlng,trolley_array[0].dir,trolley_array[0].avgVelocity);
 		console.log(pre_eta);
-		var eta = Math.ceil(pre_eta);
-		console.log(pre_eta);
+		var eta_mins = Math.floor(pre_eta/60);
+		var eta_secs = pre_eta-(eta_mins*60);
 		
 		if(eta){
 			eta_requested = true;
 			var html = "<div class=ui-grid-b>";
 			html +=   "<div class=ui-block-a><center>Stop: "+the_stop.getTitle()+"</center></div>";
 			html +=   "<div class=ui-block-b><center>Route: "+the_route.title+"</center></div>";
-			html +=   "<div class=ui-block-c><center>"+eta+" s</center></div>";
+			html +=   "<div class=ui-block-c><center>"+eta_mins+"m"+eta_secs+"s</center></div>";
 			html += "</div>";
 			$( "#eta-bar" ).html(html);
 		    $('#eta-bar').css({
