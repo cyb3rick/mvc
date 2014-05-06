@@ -78,11 +78,9 @@ function getRoute2(upd_array){
 	}
 	
 	var freqIdx = Math.max.apply(null, freqs);
-	console.log(freqIdx);
 	var res = freqs.indexOf(freqIdx);
-	console.log(res);
 
-	return min_rindex;
+	return res;
 }
 
 
