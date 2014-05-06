@@ -165,7 +165,7 @@ function processUpdate(upd) {
 		}
 		
 		t.route = getRoute2(t.pointsTraversed);
-		console.log("Route (best match) " + route_array[t.route].value.getTitle());	
+		console.log("Route (best match) " + route_array[t.route].title);	
 		t.dir = getDirection2(t.route,t.pointsTraversed);
 		
 		showRoute(route_array[t.route].key);
@@ -176,9 +176,7 @@ function processUpdate(upd) {
 		
 		t.marker.setPosition(t.latlng);
 		//t.marker.setVisible(google.maps.geometry.poly.containsLocation(t.latlng,Campus) && !(t.avgVelocity < 1));
-		
-		// debug
-		console.log("Route (best match) " + route_array[t.route].value.getTitle());	
+	
 		console.log("Current direction: "+t.dir);
 		console.log("--------------------------------------------");
 	}
