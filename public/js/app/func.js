@@ -442,15 +442,17 @@ function ShowRoute(the_route){
 
 	the_route.setVisible(true);
 	
+	/*
 	for(var i=0; i < trolley_array.length; i++){
-		trolley_array[i].setVisible(false);
+		trolley_array[i].marker.setVisible(false);
 	}
 	
 	for(var i=0; i < trolley_array.length; i++){
 		if(route_array[i].value.getVisible()){
-			trolley_array[i].setVisible(true);
+			trolley_array[i].marker.setVisible(true);
 		}
 	}
+	*/
 	
 	centerOnPath(the_route.getPath(),map);
 	return {"poly":the_route,"title":title};
