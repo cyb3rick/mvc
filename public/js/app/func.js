@@ -55,6 +55,15 @@ function getRoute2(upd_array){
 	var freqs = [0,0,0,0,0];
 	var count;
 	
+	for(var j=0; j < route_array.length; j++){
+		curr_dist = closestPointOnPath(route_array[j].value.getPath(),upd_array[i]).dist;
+		if(curr_dist < min || i==0 ){
+			min = curr_dist;
+			min_rindex = j;
+		}
+	}
+	
+	/*
 	for(var i=0; i < upd_array.length; i++){
 		min = 0;
 		min_rindex = -1;
@@ -76,8 +85,8 @@ function getRoute2(upd_array){
 	
 	var freqIdx = Math.max.apply(null, freqs);
 	var res = freqs.indexOf(freqIdx);
-
-	return res;
+	*/
+	return min_rindex;
 }
 
 
