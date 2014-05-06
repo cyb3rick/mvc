@@ -218,7 +218,7 @@ function processUpdate(upd) {
 }
 
 function getEta(stop_index,route_index,tlatlng,tdir,avgVelocity){
-	var distance = getDistanceAcrossPath(stop_array[stop_index].value.getPosition(),tlatlng,route_array[route_index].value.getPath(),route_array[route].type,tdir).len;
+	var distance = getDistanceAcrossPath(stop_array[stop_index].value.getPosition(),tlatlng,route_array[route_index].value.getPath(),route_array[route_index].type,tdir).len;
 	return distance/avgVelocity;
 }
 
