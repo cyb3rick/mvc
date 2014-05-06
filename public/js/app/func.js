@@ -19,10 +19,60 @@ function initialize() {
 
 google.maps.event.addDomListener(window, "load", initialize);
 
-
-function degToDec(deg) {
+function getDirection2(rindex,upd_array){
+	var index0 = closestPointOnPath(route_array[rindex].value.getPath(),upd_array[0]).index;
+	var index1 = closestPointOnPath(route_array[rindex].value.getPath(),upd_array[1]).index;
 	
-};
+	if(route_array[rindex].type == "linear"){
+		if(index0 > index1){
+			return 1;
+		}
+		
+		else if(index0 < index1){
+			return -1;
+		}
+		else return 0;
+	} else if(route_array[rindex].type == "circular"){
+		var diff0 = (((index0 - index1) % rlength) + rlength) % rlength;
+		var diff1 = (((index1 - index0) % rlength) + rlength) % rlength;
+		
+		if(diff0 < diff1){
+			return -1;
+		}
+		else if(diff0 > diff1){
+			return 1;
+		}
+		else return 0;
+	}
+	else return 0;
+}
+
+function getRoute2(upd_array){
+	var min;
+	var min_rindex;
+	var curr_dist;
+	var scores = [];
+	var freqs = [0,0,0,0,0];
+	var count;
+	
+	for(var i=0; i < upd_array.length; i++){
+		for(var j=0; j < route_array.length; j++){
+			curr_dist = closestPointOnPath(route_array[j].value.getPath(),upd_array[i]).dist;
+			if(curr_dist < min || i==0 ){
+				min = curr_dist;
+				min_rindex = j;
+			}
+		}
+		scores[i] = min_rindex;
+	}
+	
+	for(var i=0; i < scores.length; i++){
+		freqs[scores[i]]++;
+	}
+
+	return freqs.indexOf(Math.max.apply(null, freqs));
+}
+
 
 /**
  * A function used to create a representation of a trolley.
@@ -52,7 +102,8 @@ function Trolley(id,lat,lng,date){
 	
 	this.latlng = new google.maps.LatLng(lat,lng);
 	this.date = date;
-	this.stopsTraversed = [];
+	//this.stopsTraversed = [];
+	this.pointsTraversed = [];
 	this.route = undefined;
 	this.dir = undefined;
 	this.velocities = [];
@@ -67,7 +118,6 @@ function Trolley(id,lat,lng,date){
  * upd - a JSON object containing information obtained from the tracking unit inside the trolleys.
  */
 function processUpdate(upd) {
-	
 	var tindex = -1;		
 	for(var trolley in trolley_array) {
 	    if(trolley_array[trolley].id == upd.id){
@@ -76,7 +126,6 @@ function processUpdate(upd) {
 	}
 		
 	if (tindex >= 0) {
-		
 		var t = trolley_array[tindex];	
 
 		var latt = new String(parseFloat(upd.lat));
@@ -89,21 +138,30 @@ function processUpdate(upd) {
 		
 		map.setCenter(t.latlng);
 		
-		var closestStop = getClosestStop(t.latlng); 				
-		if ((closestStop.dist < 30) && (closestStop.index != t.stopsTraversed[0])) {
+		//var closestStop = getClosestStop(t.latlng); 				
+		/*if ((closestStop.dist < 30) && (closestStop.index != t.stopsTraversed[0])) {
 			t.stopsTraversed.unshift(closestStop.index);	
 			while (t.stopsTraversed.length > 10){
 				t.stopsTraversed.pop();
 			}
+		}*/
+		
+		t.stopsTraversed.unshift(t.latlng);
+		
+		while (t.pointsTraversed.length > 10){
+			t.pointsTraversed.pop();
 		}
 		
 		t.velocities.unshift(upd.speed*0.44704);	
-		while(t.velocities.length > 36){
+		
+		while(t.velocities.length > 12){
 			t.velocities.pop();
 		}
 		
-		t.route = getRoute(t.stopsTraversed).index;
-		t.dir = getDirection(t.stopsTraversed,t.routeIndex);
+		t.route = getRoute2(t.pointsTraversed).index;
+		t.dir = getDirection2(t.route,t.pointsTraversed);
+		
+		showRoute(route_array[t.route].key);
 		
 		var sum = t.velocities.reduce(function(a, b) { return a + b; });
 		var avg = sum / t.velocities.length;
@@ -111,17 +169,22 @@ function processUpdate(upd) {
 		
 		t.marker.setPosition(t.latlng);
 		//t.marker.setVisible(google.maps.geometry.poly.containsLocation(t.latlng,Campus) && !(t.avgVelocity < 1));
+		
+		// debug
+		console.log("Route (best match) " + route_array[t.route].value.getTitle());	
+		console.log("Current direction: "+t.dir);
+		console.log("--------------------------------------------");
 	}
 	else {
 		var t = new Trolley(upd.id,upd.lat,upd.lng,upd.time);
 		t.velocities.unshift(upd.speed*0.44704);
 		t.avgVelocity = upd.speed*0.44704;
 		
-		var closestStop = getClosestStop(t.latlng);		
-		if(closestStop.dist < 30){
-			t.stopsTraversed.unshift(t.latlng);
-		}
-
+		//var closestStop = getClosestStop(t.latlng);		
+		//if(closestStop.dist < 30){
+			t.pointsTraversed.unshift(t.latlng);
+		//}
+		
 		t.marker = new google.maps.Marker({
 			position: t.latlng,
             map: map,
@@ -134,6 +197,7 @@ function processUpdate(upd) {
 		// debug
 		console.log("Is Contained: " + isContainedInCampus);	
 		console.log("Has avg vel below 1 " + avgVelNearZero);
+		console.log("--------------------------------------------");
 					
 		//t.marker.setVisible(isContainedInCampus && avgVelNearZero);
 		trolley_array.push(t);
@@ -298,7 +362,7 @@ function getClosestStop(latlng){
  * 	calculates the direction the trolley is moving with respect to the path.
  */
 function closestPointOnPath(path,latlng){
-	var coord = (new google.maps.Polyline({ path: path})).getPath().getAt(0);
+	var coord = path.getAt(0);
 	var theindex;
 	var this_dist;
 	var min_dist;
