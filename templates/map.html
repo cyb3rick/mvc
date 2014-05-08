@@ -1,5 +1,15 @@
+
 <div data-role="page" id="home">
-	<!--left menu panel-->
+
+	<!-- TOP HEADER -->
+	<div data-role="header" data-theme="b" > 
+		<a href="#menu-panel" data-role="button" data-icon="bars" data-mini="true" data-inline="true">Menu</a>
+    	<h4>TrolleyTracker</h4>    	   	    	
+    	<a href="#options-panel" data-role="button" data-rel="popup" data-icon="gear" data-mini="true" data-inline="true">Options</a>
+	</div><!-- /TOP HEADER -->
+	
+	
+	<!-- LEFT MENU PANEL-->
 	<div data-role="panel" id="menu-panel" data-position="left" data-display="overlay" data-theme="b">
 		<h3 id="menu-header">Main Menu</h3>
 		<div data-role="listview">
@@ -10,15 +20,10 @@
 			<li id="menu-api-key"><a href="/request">Request API Key</a></li>
 			<li id="menu-admin-login"><a href="/admin">Admin Login</a></li>
 		</div>
-	</div><!--/left panel-->
+	</div><!-- /LEFT MENU PANEL -->
+		
 	
-	<div data-role="header" data-theme="b">
-		<a href="#menu-panel" data-role="button" data-icon="bars" data-mini="true" data-inline="true">Menu</a>
-    	<h4>UPRM TrolleyTracker</h4>
-    	<a href="#options-panel" data-role="button" data-rel="popup" data-icon="gear" data-mini="true" data-inline="true">Options</a>
-	</div>
-	
-	<!--right menu panel-->
+	<!-- RIGHT MENU PANEL-->
 	<div data-role="panel" id="options-panel" data-position="right" data-display="overlay" data-theme="b">
 		<h3 id="menu-header">Options</h3>
 		<div data-role="listview">
@@ -28,17 +33,23 @@
 			<!--li id="options-announcements"><a>Show Announcements</a></li-->
 			<li id="options-clear-eta"><a>Clear ETA</a></li>
 		</div>
-	</div><!--/right panel-->
+	</div><!-- /RIGHT MENU PANEL -->
 	
+	
+	<!-- CONTENT -->
 	<div data-role="content" id="content">
-		<!--decorative red bar below header-->
+		
+		<!-- ETA BAR/ -->
 		<div data-theme="b" id="eta-bar"></div>
+		
+		<!-- MAP CANVAS/ -->
 		<div id="map_canvas"></div>
 		
-		<!--ETA popup-->
-		<div data-role="popup" id="eta-popup" data-theme="b" data-overlay-theme="c" class="ui-content pop" data-transition="pop">
+		<!-- ETA POPUP -->
+		<div data-role="popup" id="eta-popup" data-theme="b" data-overlay-theme="c" class="ui-content pop">			
 			<a href="#" data-rel="back" data-role="button" data-theme="c" data-icon="delete" data-iconpos="notext" class="ui-btn-right">Close</a>
-			<h4>Select Route and Stop</h4>
+			
+			<h4>Select Route and Stop</h4>			
 			<label for="select-route" class="ui-hidden-accessible">Select Route</label>
 			<select name="select-route" id="select-route" data-placeholder="true">
 				<option value="">Select Route</option>
@@ -48,13 +59,14 @@
 				<option value="route4">Terrace</option>
 				<option value="route5">Darlington</option>
 			</select>
-			<label for="select-stop" class="ui-hidden-accessible">Select Stop</label>
+			
+			<label for="select-stop" class="ui-hidden-accessible">Select Stop</label>			
 			<select name="select-stop" id="select-stop" data-placeholder="true">
 				<option value="0">Select Bus Stop</option>
-			</select>
-			<br/>
+			</select>			
+			<br/>			
 			<a id="calculate-eta" data-role="button" data-theme="b">Calculate</a>
-		</div><!--/popup-->
+		</div><!-- /ETA POPUP -->
 		
 		<!--Toggle Routes popup--> 
 		<div data-role="popup" id="routes-popup" data-theme="b" data-overlay-theme="c" class="ui-content pop" data-transition="pop">

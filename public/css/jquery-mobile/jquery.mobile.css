@@ -788,9 +788,9 @@ a.ui-link-inherit {
 	border-bottom-left-radius: 			.6em /*{global-radii-blocks}*/;
 }
 .ui-corner-all {
-	-moz-border-radius: 				.6em /*{global-radii-blocks}*/;
-	-webkit-border-radius: 				.6em /*{global-radii-blocks}*/;
-	border-radius: 						.6em /*{global-radii-blocks}*/;
+	-moz-border-radius: 				0em /*.6em {global-radii-blocks}*/;
+	-webkit-border-radius: 				0em /*.6em {global-radii-blocks}*/;
+	border-radius: 						0em /*.6em {global-radii-blocks}*/;
 }
 .ui-corner-none {
 	-moz-border-radius: 				   0;
@@ -1004,9 +1004,10 @@ a.ui-link-inherit {
 	border-bottom-left-radius: 			1em /*{global-radii-buttons}*/;
 }
 .ui-btn-corner-all {
-	-moz-border-radius: 				1em /*{global-radii-buttons}*/;
-	-webkit-border-radius: 				1em /*{global-radii-buttons}*/;
-	border-radius: 						1em /*{global-radii-buttons}*/;
+	/* Disabling them */
+	-moz-border-radius: 				0em /*{global-radii-buttons}*/;
+	-webkit-border-radius: 				0em /*{global-radii-buttons}*/;
+	border-radius: 						0em /*{global-radii-buttons}*/;
 }
 /* radius clip workaround for cleaning up corner trapping */
 .ui-corner-tl,

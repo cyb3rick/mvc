@@ -1,13 +1,15 @@
 function initialize() {
 	var UPRM = new google.maps.LatLng(18.209438, -67.140543);
 	
+	var mapStyles = [{"featureType":"water","elementType":"geometry","stylers":[{"color":"#a2daf2"}]},{"featureType":"landscape.man_made","elementType":"geometry","stylers":[{"color":"#f7f1df"}]},{"featureType":"landscape.natural","elementType":"geometry","stylers":[{"color":"#d0e3b4"}]},{"featureType":"landscape.natural.terrain","elementType":"geometry","stylers":[{"visibility":"off"}]},{"featureType":"poi.park","elementType":"geometry","stylers":[{"color":"#bde6ab"}]},{"featureType":"poi","elementType":"labels","stylers":[{"visibility":"off"}]},{"featureType":"poi.medical","elementType":"geometry","stylers":[{"color":"#fbd3da"}]},{"featureType":"poi.business","stylers":[{"visibility":"off"}]},{"featureType":"road","elementType":"geometry.stroke","stylers":[{"visibility":"off"}]},{"featureType":"road","elementType":"labels","stylers":[{"visibility":"off"}]},{"featureType":"road.highway","elementType":"geometry.fill","stylers":[{"color":"#ffe15f"}]},{"featureType":"road.highway","elementType":"geometry.stroke","stylers":[{"color":"#efd151"}]},{"featureType":"road.arterial","elementType":"geometry.fill","stylers":[{"color":"#ffffff"}]},{"featureType":"road.local","elementType":"geometry.fill","stylers":[{"color":"black"}]},{"featureType":"transit.station.airport","elementType":"geometry.fill","stylers":[{"color":"#cfb2db"}]}];
 	var mapOptions = {
 		zoom : 17,
 		minZoom : 16,
 		maxZoom : 18,
 		center : UPRM,
 		mapTypeId : google.maps.MapTypeId.ROADMAP,
-		disableDefaultUI : true
+		disableDefaultUI : true,
+		styles: mapStyles
 	};
 	
 	map = new google.maps.Map(document.getElementById('map_canvas'), mapOptions);
@@ -990,9 +992,7 @@ $(document).on('click', "#options-show-all-routes", function() {
 
 $(document).on('click', "#options-clear-eta", function() {	
 	$("#eta-bar").empty();
-	$("#eta-bar").css({
-		'height': '6px',
-	});
+	$("#eta-bar").css({'height': '6px', 'background-color': '#1d1d1d'});	
 	eta_requested = false;
 });
 
@@ -1059,26 +1059,22 @@ function showEta(){
 		
 		var pre_eta = getEta(stop_index,route_index,trolley_array[0].latlng,trolley_array[0].dir,trolley_array[0].avgVelocity);
 		console.log(pre_eta);
-		var eta_mins = Math.floor(pre_eta/60);
-		var eta_secs = pre_eta-(eta_mins*60);
 		
-		if(eta){
-			eta_requested = true;
-			var html = "<div class=ui-grid-b>";
-			html +=   "<div class=ui-block-a><center>Stop: "+the_stop.getTitle()+"</center></div>";
-			html +=   "<div class=ui-block-b><center>Route: "+the_route.title+"</center></div>";
-			html +=   "<div class=ui-block-c><center>"+eta_mins+"m"+eta_secs+"s</center></div>";
-			html += "</div>";
-			$( "#eta-bar" ).html(html);
-		    $('#eta-bar').css({
-		        'height': '22px'
-		    });
-	    
-	    	$("#eta-popup").popup("close");
-	    }
-	    else{
-	    	console.log("Eta cannot be calculated for the selected trolley.");
-	    }
+		var eta = parseInt(pre_eta);
+		var eta_mins = Math.floor(pre_eta/60);
+		var eta_secs = parseInt(pre_eta-(eta_mins*60));
+				
+		eta_requested = true;
+		
+		var html = "<div class=ui-grid-b>";
+		html +=   "<div class=ui-block-a><center>Stop: "+the_stop.getTitle()+"</center></div>";
+		html +=   "<div class=ui-block-b><center>Route: "+the_route.title+"</center></div>";
+		html +=   "<div class=ui-block-c><center>"+eta_mins+"m"+eta_secs+"s</center></div>";
+		html += "</div>";
+		$( "#eta-bar" ).html(html);
+		$('#eta-bar').css({'height': '22px', 'background': '#cccccc'});
+	    $("#eta-popup").popup("close");
+	    	 
 	}
 	else{
 		alert("Please select both a route and a stop.");

@@ -4,7 +4,7 @@
 
 var express = require('express');
 var app = express();
-var http = require('http');
+//var http = require('http');
 var config = require('./config')();
 var MongoClient = require('mongodb').MongoClient;
 
@@ -43,8 +43,6 @@ MongoClient.connect(mongoURL, function(err, db) {
 
 		//Get 'updates' collection from DB
 		var updCol = db.collection('updates');
-
-		// TODO: Add event listeners here
 
 		// Controllers
 		var AdminCtrl = require('./controllers/Admin');
