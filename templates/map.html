@@ -5,7 +5,7 @@
 	<div data-role="header" data-theme="b" > 
 		<a href="#menu-panel" data-role="button" data-icon="bars" data-mini="true" data-inline="true">Menu</a>
     	<h4>TrolleyTracker</h4>    	   	    	
-    	<a href="#options-panel" data-role="button" data-rel="popup" data-icon="info" data-mini="true" data-inline="true">News</a>
+    	<a href="#news-panel" data-role="button" data-rel="popup" data-icon="info" data-mini="true" data-inline="true">News</a>
 	</div><!-- /TOP HEADER -->
 	
 	
@@ -29,13 +29,13 @@
 		
 	
 	<!-- RIGHT MENU PANEL-->
-	<div data-role="panel" id="options-panel" data-position="right" data-display="overlay" data-theme="b">
+	<div data-role="panel" id="news-panel" data-position="right" data-display="overlay" data-theme="b">
 		<h3 id="menu-header">News</h3>
 		<div data-role="listview">
-			<li><a href="#">Trolley Tracker 1.0 released<br/>2 days ago</a></li>
-			<li><a href="#">Service Interruption<br/>1 week ago</a></li>
-			<li><a href="#">New Routes Announced<br/>3 weeks ago </a></li>
-			<li><a href="#">Service Interruption<br/>4 months ago </a></li>
+			<!--li><a href="#" class="news">Trolley Tracker 1.0 released<br/>2 days ago</a></li>
+			<li><a href="#" class="news">Service Interruption<br/>1 week ago</a></li>
+			<li><a href="#" class="news">New Routes Announced<br/>3 weeks ago </a></li-->
+			<li><a href="#news-popup" class="news" data-rel="popup">Service Interruption<br/>Today</a></li>
 		</div>
 	</div><!-- /RIGHT MENU PANEL -->
 	
@@ -94,6 +94,14 @@
 					<label for="all-routes">Show All</label>
 				</fieldset>
 			</form>
+		</div><!--/popup-->
+		
+		<div data-role="popup" id="news-popup" data-theme="b" data-overlay-theme="c" class="ui-content pop" data-transition="pop">
+			<a href="#" data-rel="back" data-role="button" data-theme="c" data-icon="delete" data-iconpos="notext" class="ui-btn-right">Close</a>
+			<h4>Service Interruption</h4>
+			<!--body-->
+			<p>Trolleys with not be in circulation during this afternoon.</p>
+			</div>
 		</div><!--/popup-->
 		
 		<!--Service Hours popup--> 

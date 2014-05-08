@@ -949,6 +949,11 @@ $(document).on('click', "#menu-eta", function() {
 	$( "#eta-popup" ).popup( "open" );
 });
 
+$(document).on('click', ".news", function() {
+	$( "#news-panel" ).panel( "close" );
+	$( "#news-popup" ).popup( "open" );
+});
+
 $(document).on('click', "#menu-routes", function() {
 	$( "#menu-panel" ).panel( "close" );
 	$( "#routes-popup" ).popup( "open" );
