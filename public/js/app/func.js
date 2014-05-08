@@ -1018,6 +1018,7 @@ $(document).on('click', "#eta-clear", function() {
 
 $(document).on('click', "#select-route", function() {
 	var stop_key = $('#select-route').val();
+	console.log(stop_key);
 	if(stop_key != ""){
 		ShowRoute(stop_key);
 	}
@@ -1082,7 +1083,29 @@ function showEta(){
 }
 
 $(document).on('change', 'input:radio[name="route-choice"]', function() {
-	ShowRoute($(this).val());
+	var val = $(this).val();
+	
+	if(val == "all"){
+		var allon = true;
+	    $.each(route_array, function(i){
+	    	if(route_array[i].value.getVisible() == false){
+	    		allon = false;
+	    	}
+	    });
+	    
+	    if(allon){
+	    	$.each(route_array, function(j){
+				route_array[j].value.setVisible(false);
+		    });
+	    } else {
+		    $.each(route_array, function(j){
+				route_array[j].value.setVisible(true);
+		    });
+	    }	
+	}
+	else{
+		ShowRoute(val);
+	}
 });
 
 $(document).on('change', "#select-route", function() {
